@@ -112,6 +112,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnLogin);
             this.Name = "LoginForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "登陆";
             this.ResumeLayout(false);
             this.PerformLayout();

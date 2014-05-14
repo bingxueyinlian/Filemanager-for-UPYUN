@@ -35,6 +35,25 @@ namespace Filemanager_for_UPYUN
 
         #region Private Mothod(s)
 
+        private void SetMenuType(MenuType mt)
+        {
+            switch (mt)
+            {
+                case MenuType.File:
+                    lvList.ContextMenuStrip = fileContextMenu;
+                    break;
+                case MenuType.Dir:
+                    lvList.ContextMenuStrip = dirContextMenu;
+                    break;
+                case MenuType.Default:
+                    lvList.ContextMenuStrip = defaultContextMenu;
+                    break;
+                default:
+                    lvList.ContextMenuStrip = defaultContextMenu;
+                    break;
+            }
+        }
+
         /// <summary>
         /// 列举当前目录下的内容
         /// </summary>
@@ -60,23 +79,23 @@ namespace Filemanager_for_UPYUN
                     lvList.Items.Add(lvItem);
                     //获取默认打开图片
                     string ext = "";
-                    if (item.filetype == "N")
+                    if (item.filetype == FileType.File)
                     {
                         ext = Path.GetExtension(item.filename);
                     }
-                    else if (item.filetype == "F")
+                    else if (item.filetype == FileType.Dir)
                     {
                         ext = "DIR";
                     }
                     //绑定到ImageList中
                     if (!imgList.Images.ContainsKey(ext))
                     {
-                        if (item.filetype == "N")
+                        if (item.filetype == FileType.File)
                         {
                             Icon icon = IconUtils.GetIconForFileExtension(ext, false, false);
                             imgList.Images.Add(ext, icon);
                         }
-                        else if (item.filetype == "F")
+                        else if (item.filetype == FileType.Dir)
                         {
                             Icon icon = IconUtils.GetIconForFolder(false, false);
                             imgList.Images.Add(ext, icon);
@@ -117,7 +136,7 @@ namespace Filemanager_for_UPYUN
         /// <summary>
         /// 上传文件
         /// </summary>
-        private void FileUpload()
+        private void UploadFile()
         {
             OpenFileDialog dlg = new OpenFileDialog();
             if (dlg.ShowDialog() == DialogResult.OK)
@@ -130,7 +149,7 @@ namespace Filemanager_for_UPYUN
                     bool res = false;
                     try
                     {
-                        string path = this.curPath + Path.DirectorySeparatorChar + Path.GetFileName(fName);
+                        string path = GetFullPath(Path.GetFileName(fName));
                         res = this.upYun.writeFile(path, data, false);
                         if (res)
                         {
@@ -167,7 +186,7 @@ namespace Filemanager_for_UPYUN
             lvItem.ImageKey = ext;
             lvList.Items.Add(lvItem);
             lvItem.Selected = true;
-            RenameItem();
+            RenameItem(true);
         }
 
         /// <summary>
@@ -177,17 +196,37 @@ namespace Filemanager_for_UPYUN
         {
             ListFileInfo(curPath);
         }
+        /// <summary>
+        /// 打开文件夹
+        /// </summary>
+        private void OpenDir()
+        {
+            if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
+            {
+                ListViewItem item = lvList.SelectedItems[0];
+                this.curPath = GetFullPath(item.Text);
+                ListFileInfo(curPath);
+                SetMenuType(MenuType.Default);
+            }
+        }
 
         /// <summary>
         /// 重命名当前选中的项
         /// </summary>
-        private void RenameItem()
+        private void RenameItem(bool isNewDir)
         {
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
                 ListViewItem item = lvList.SelectedItems[0];
                 TextBox textBox = new TextBox();
                 textBox.Location = new System.Drawing.Point(item.Bounds.Left + 35, item.Bounds.Top);
+                textBox.KeyDown += delegate(object sender, KeyEventArgs e)
+                {
+                    if (e.KeyCode == Keys.Enter)
+                    {
+                        this.Focus();
+                    }
+                };
                 textBox.LostFocus += delegate(object sender, EventArgs e)
                 {
                     if (item.Text != textBox.Text)
@@ -195,6 +234,15 @@ namespace Filemanager_for_UPYUN
                         item.Text = textBox.Text;
                     }
                     lvList.Controls.Remove(textBox);
+                    if (isNewDir)
+                    {
+                        string path = GetFullPath(item.Text);
+                        bool res = this.upYun.mkDir(path, false);
+                        if (!res)
+                        {
+                            Debug.WriteLine(path + ":新建失败!");
+                        }
+                    }
                 };
                 string fileName = item.Text;
                 textBox.Text = fileName;
@@ -210,6 +258,16 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
+        /// 获取完整路径
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <returns></returns>
+        private string GetFullPath(string fileName)
+        {
+            return this.curPath + Path.DirectorySeparatorChar + fileName;
+        }
+
+        /// <summary>
         /// 删除当前选中的项
         /// </summary>
         private void DeleteItem()
@@ -217,7 +275,7 @@ namespace Filemanager_for_UPYUN
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
                 ListViewItem lvItem = lvList.SelectedItems[0];
-                string path = this.curPath + Path.DirectorySeparatorChar + lvItem.Text;
+                string path = GetFullPath(lvItem.Text);
                 bool res = false;
                 try
                 {
@@ -237,6 +295,104 @@ namespace Filemanager_for_UPYUN
                 }
             }
         }
+        /// <summary>
+        /// 删除选中项(多选)
+        /// </summary>
+        private void DeleteCheckedItems()
+        {
+            if (lvList.CheckedItems != null && lvList.CheckedItems.Count > 0)
+            {
+                foreach (ListViewItem lvItem in lvList.CheckedItems)
+                {
+                    string path = GetFullPath(lvItem.Text);
+                    bool res = false;
+                    try
+                    {
+                        if (lvItem.Tag.ToString() == FileType.File)//删除文件
+                        {
+                            res = this.upYun.deleteFile(path);
+                            if (res)
+                            {
+                                lvList.Items.Remove(lvItem);
+                            }
+                        }
+                        else if (lvItem.Tag.ToString() == FileType.Dir)//删除目录
+                        {
+                            res = DeleteDir(path);
+                            if (res)
+                            {
+                                lvList.Items.Remove(lvItem);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+                    if (!res)
+                    {
+                        Debug.WriteLine(path + ":删除失败!");
+                    }
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 递归删除目录
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private bool DeleteDir(string path)
+        {
+            try
+            {
+                List<FolderItem> itemList = this.upYun.readDir(path);
+                if (itemList == null || itemList.Count == 0)
+                {
+                    //删除空目录
+                    bool res = this.upYun.rmDir(path);
+                    if (res == false)
+                    {
+                        Debug.WriteLine(path + ":删除失败!");
+                    }
+                }
+                else
+                {
+                    foreach (FolderItem fItem in itemList)
+                    {
+                        if (fItem.filetype == FileType.File)//删除文件
+                        {
+                            string subpath = path + Path.DirectorySeparatorChar + fItem.filename;
+                            bool res = this.upYun.deleteFile(subpath);
+                            if (res == false)
+                            {
+                                Debug.WriteLine(path + ":删除失败!");
+                            }
+                        }
+                        else if (fItem.filetype == FileType.Dir)//删除目录
+                        {
+                            string subpath = path + Path.DirectorySeparatorChar + fItem.filename;
+                            bool res = DeleteDir(subpath);
+                            if (res == false)
+                            {
+                                Debug.WriteLine(path + ":删除失败!");
+                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine(path + ":删除失败!");
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                Debug.WriteLine(path + ":删除失败!");
+                return false;
+            }
+            return true;
+        }
         #endregion
 
         #region Event(s)
@@ -251,9 +407,7 @@ namespace Filemanager_for_UPYUN
         private void MainForm_Load(object sender, System.EventArgs e)
         {
             ListFileInfo(curPath);
-            //lvList.ContextMenuStrip = fileContextMenu;
             lvList.ListViewItemSorter = new ListViewColumnSorter();
-
         }
 
         //选中项改变时，切换右键菜单
@@ -261,22 +415,22 @@ namespace Filemanager_for_UPYUN
         {
             if (e.IsSelected)
             {
-                if (e.Item.Tag.ToString() == "N")
+                if (e.Item.Tag.ToString() == FileType.File)
                 {
-                    lvList.ContextMenuStrip = fileContextMenu;
+                    SetMenuType(MenuType.File);
                 }
-                else if (e.Item.Tag.ToString() == "F")
+                else if (e.Item.Tag.ToString() == FileType.Dir)
                 {
-                    lvList.ContextMenuStrip = dirContextMenu;
+                    SetMenuType(MenuType.Dir);
                 }
                 else
                 {
-                    lvList.ContextMenuStrip = defaultContextMenu;
+                    SetMenuType(MenuType.Default);
                 }
             }
             else
             {
-                lvList.ContextMenuStrip = defaultContextMenu;
+                SetMenuType(MenuType.Default);
             }
         }
 
@@ -363,7 +517,7 @@ namespace Filemanager_for_UPYUN
         //上传文件
         private void MenuItem_Upload_Click(object sender, EventArgs e)
         {
-            FileUpload();
+            UploadFile();
         }
 
         //刷新
@@ -375,7 +529,7 @@ namespace Filemanager_for_UPYUN
         //重命名
         private void MenuItem_Rename_Click(object sender, EventArgs e)
         {
-            RenameItem();
+            RenameItem(false);
         }
 
         //删除
@@ -383,6 +537,39 @@ namespace Filemanager_for_UPYUN
         {
             DeleteItem();
         }
+
+        //打开文件夹
+        private void MenuItem_OpenDir_Click(object sender, EventArgs e)
+        {
+            OpenDir();
+        }
+
+        //显示主页
+        private void btnHome_Click(object sender, EventArgs e)
+        {
+            this.curPath = "";
+            ListFileInfo(curPath);
+        }
+
+        //双击打开文件夹
+        private void lvList_DoubleClick(object sender, EventArgs e)
+        {
+            if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
+            {
+                ListViewItem lvItem = lvList.SelectedItems[0];
+                if (lvItem.Tag.ToString() == "F")
+                {
+                    OpenDir();
+                }
+            }
+        }
+
+        //删除选中项(多选)
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            DeleteCheckedItems();
+        }
+
 
         #endregion
 

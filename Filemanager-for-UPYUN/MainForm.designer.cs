@@ -30,9 +30,9 @@
         {
             this.components = new System.ComponentModel.Container();
             this.lvList = new System.Windows.Forms.ListView();
-            this.colFileName = new System.Windows.Forms.ColumnHeader("(无)");
-            this.colSize = new System.Windows.Forms.ColumnHeader();
-            this.colModiDate = new System.Windows.Forms.ColumnHeader();
+            this.colFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colModiDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.defaultContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.defaultMenuItem_Upload = new System.Windows.Forms.ToolStripMenuItem();
             this.defaultMenuItem_NewDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,8 +45,13 @@
             this.fileMenuItem_Delete = new System.Windows.Forms.ToolStripMenuItem();
             this.dirContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.dirMenuItem_Rename = new System.Windows.Forms.ToolStripMenuItem();
+            this.dirMenuItem_OpenDir = new System.Windows.Forms.ToolStripMenuItem();
             this.dirMenuItem_Delete = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnHome = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
             this.defaultContextMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.fileContextMenu.SuspendLayout();
@@ -72,9 +77,10 @@
             this.lvList.TabIndex = 0;
             this.lvList.UseCompatibleStateImageBehavior = false;
             this.lvList.View = System.Windows.Forms.View.Details;
-            this.lvList.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvList_ItemChecked);
             this.lvList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lvList_ColumnClick);
+            this.lvList.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvList_ItemChecked);
             this.lvList.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvList_ItemSelectionChanged);
+            this.lvList.DoubleClick += new System.EventHandler(this.lvList_DoubleClick);
             this.lvList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lvList_KeyDown);
             // 
             // colFileName
@@ -137,6 +143,11 @@
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.btnDelete);
+            this.splitContainer1.Panel1.Controls.Add(this.btnHome);
+            // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.chkAll);
@@ -183,9 +194,10 @@
             // 
             this.dirContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dirMenuItem_Rename,
+            this.dirMenuItem_OpenDir,
             this.dirMenuItem_Delete});
             this.dirContextMenu.Name = "dirContextMenu";
-            this.dirContextMenu.Size = new System.Drawing.Size(113, 48);
+            this.dirContextMenu.Size = new System.Drawing.Size(113, 70);
             // 
             // dirMenuItem_Rename
             // 
@@ -195,12 +207,41 @@
             this.dirMenuItem_Rename.Visible = false;
             this.dirMenuItem_Rename.Click += new System.EventHandler(this.MenuItem_Rename_Click);
             // 
+            // dirMenuItem_OpenDir
+            // 
+            this.dirMenuItem_OpenDir.Name = "dirMenuItem_OpenDir";
+            this.dirMenuItem_OpenDir.Size = new System.Drawing.Size(112, 22);
+            this.dirMenuItem_OpenDir.Text = "打开";
+            this.dirMenuItem_OpenDir.Click += new System.EventHandler(this.MenuItem_OpenDir_Click);
+            // 
             // dirMenuItem_Delete
             // 
             this.dirMenuItem_Delete.Name = "dirMenuItem_Delete";
             this.dirMenuItem_Delete.Size = new System.Drawing.Size(112, 22);
             this.dirMenuItem_Delete.Text = "删除";
             this.dirMenuItem_Delete.Click += new System.EventHandler(this.MenuItem_Delete_Click);
+            // 
+            // btnHome
+            // 
+            this.btnHome.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnHome.Location = new System.Drawing.Point(3, 19);
+            this.btnHome.Name = "btnHome";
+            this.btnHome.Size = new System.Drawing.Size(75, 23);
+            this.btnHome.TabIndex = 0;
+            this.btnHome.Text = "主页";
+            this.btnHome.UseVisualStyleBackColor = true;
+            this.btnHome.Click += new System.EventHandler(this.btnHome_Click);
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnDelete.Location = new System.Drawing.Point(84, 19);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.TabIndex = 0;
+            this.btnDelete.Text = "删除";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // MainForm
             // 
@@ -211,11 +252,13 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainForm";
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.defaultContextMenu.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.fileContextMenu.ResumeLayout(false);
             this.dirContextMenu.ResumeLayout(false);
@@ -242,5 +285,8 @@
         private System.Windows.Forms.CheckBox chkAll;
         private System.Windows.Forms.ToolStripMenuItem fileMenuItem_Delete;
         private System.Windows.Forms.ToolStripMenuItem dirMenuItem_Delete;
+        private System.Windows.Forms.ToolStripMenuItem dirMenuItem_OpenDir;
+        private System.Windows.Forms.Button btnHome;
+        private System.Windows.Forms.Button btnDelete;
     }
 }
