@@ -11,10 +11,12 @@ namespace Filemanager_for_UPYUN
     public partial class MainForm : Form
     {
         #region Variable
-        private const char sortAsc = '↑';// (char)0x25b2;;
-        private const char sortDesc = '↓';//(char)0x25bc;;
+        private const char sortAsc = '↑';// (char)0x25b2;
+        private const char sortDesc = '↓';//(char)0x25bc;
+        private readonly string dirSeparator = Path.DirectorySeparatorChar.ToString();//目录分隔符
         private UpYun upYun;
         private string curPath = "";//当前路径
+        private string downPath = "D:";//下载路径
         private DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);//用于计算最后修改时间
         #endregion
 
@@ -33,7 +35,7 @@ namespace Filemanager_for_UPYUN
 
         #endregion
 
-        #region Private Mothod(s)
+        #region Private Mothods
 
         private void SetMenuType(MenuType mt)
         {
@@ -61,7 +63,7 @@ namespace Filemanager_for_UPYUN
         private void ListFileInfo(string path)
         {
             lvList.Items.Clear();
-            List<FolderItem> itemList = upYun.readDir(path);
+            List<FolderItem> itemList = this.upYun.readDir(path);
             if (itemList != null && itemList.Count > 0)
             {
                 //按类型和扩展名排序
@@ -149,7 +151,7 @@ namespace Filemanager_for_UPYUN
                     bool res = false;
                     try
                     {
-                        string path = GetFullPath(Path.GetFileName(fName));
+                        string path = String.Concat(this.curPath, dirSeparator, Path.GetFileName(fName));
                         res = this.upYun.writeFile(path, data, false);
                         if (res)
                         {
@@ -194,8 +196,9 @@ namespace Filemanager_for_UPYUN
         /// </summary>
         private void RefreshList()
         {
-            ListFileInfo(curPath);
+            ListFileInfo(this.curPath);
         }
+
         /// <summary>
         /// 打开文件夹
         /// </summary>
@@ -204,8 +207,8 @@ namespace Filemanager_for_UPYUN
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
                 ListViewItem item = lvList.SelectedItems[0];
-                this.curPath = GetFullPath(item.Text);
-                ListFileInfo(curPath);
+                this.curPath = String.Concat(this.curPath, dirSeparator, item.Text);
+                RefreshList();
                 SetMenuType(MenuType.Default);
             }
         }
@@ -236,7 +239,7 @@ namespace Filemanager_for_UPYUN
                     lvList.Controls.Remove(textBox);
                     if (isNewDir)
                     {
-                        string path = GetFullPath(item.Text);
+                        string path = String.Concat(this.curPath, dirSeparator, item.Text);
                         bool res = this.upYun.mkDir(path, false);
                         if (!res)
                         {
@@ -250,7 +253,7 @@ namespace Filemanager_for_UPYUN
                 Graphics g = CreateGraphics();
                 SizeF sf = g.MeasureString(fileName, item.Font);
                 textBox.Width = (int)sf.Width + 10;
-                textBox.Height = 16;
+                //textBox.Height = 16;
                 lvList.Controls.Add(textBox);
                 textBox.Focus();
                 textBox.Select(0, fileName.Length - Path.GetExtension(fileName).Length);
@@ -258,43 +261,19 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
-        /// 获取完整路径
-        /// </summary>
-        /// <param name="fileName">文件名</param>
-        /// <returns></returns>
-        private string GetFullPath(string fileName)
-        {
-            return this.curPath + Path.DirectorySeparatorChar + fileName;
-        }
-
-        /// <summary>
         /// 删除当前选中的项
         /// </summary>
-        private void DeleteItem()
+        private void DeleteSelectedItem()
         {
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
                 ListViewItem lvItem = lvList.SelectedItems[0];
-                string path = GetFullPath(lvItem.Text);
-                bool res = false;
-                try
-                {
-                    res = this.upYun.deleteFile(path);
-                    if (res)
-                    {
-                        lvList.Items.Remove(lvItem);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
-                if (!res)
-                {
-                    Debug.WriteLine(path + ":删除失败!");
-                }
+                string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
+                DeleteItem(path, lvItem.Tag.ToString());
+                lvList.Items.Remove(lvItem);
             }
         }
+
         /// <summary>
         /// 删除选中项(多选)
         /// </summary>
@@ -304,100 +283,134 @@ namespace Filemanager_for_UPYUN
             {
                 foreach (ListViewItem lvItem in lvList.CheckedItems)
                 {
-                    string path = GetFullPath(lvItem.Text);
-                    bool res = false;
-                    try
-                    {
-                        if (lvItem.Tag.ToString() == FileType.File)//删除文件
-                        {
-                            res = this.upYun.deleteFile(path);
-                            if (res)
-                            {
-                                lvList.Items.Remove(lvItem);
-                            }
-                        }
-                        else if (lvItem.Tag.ToString() == FileType.Dir)//删除目录
-                        {
-                            res = DeleteDir(path);
-                            if (res)
-                            {
-                                lvList.Items.Remove(lvItem);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message);
-                    }
-                    if (!res)
-                    {
-                        Debug.WriteLine(path + ":删除失败!");
-                    }
+                    string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
+                    string fileType = lvItem.Tag.ToString();
+                    DeleteItem(path, fileType);
                 }
-
+                RefreshList();
             }
         }
+
+        /// <summary>
+        /// 删除文件或目录
+        /// </summary>
+        /// <param name="path">服务器路径</param>
+        /// <param name="fileType">F:目录，N:文件</param>
+        private void DeleteItem(string path, string fileType)
+        {
+            if (fileType == FileType.File)//删除文件
+            {
+                this.upYun.deleteFile(path);
+            }
+            else if (fileType == FileType.Dir)//删除目录
+            {
+                DeleteDir(path);
+            }
+        }
+
+
 
         /// <summary>
         /// 递归删除目录
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private bool DeleteDir(string path)
+        private void DeleteDir(string path)
         {
-            try
+            List<FolderItem> itemList = this.upYun.readDir(path);
+            if (itemList == null || itemList.Count == 0)
             {
-                List<FolderItem> itemList = this.upYun.readDir(path);
-                if (itemList == null || itemList.Count == 0)
+                //删除空目录
+                this.upYun.rmDir(path);
+            }
+            else
+            {
+                for (int i = 0; i < itemList.Count; i++)
                 {
-                    //删除空目录
-                    bool res = this.upYun.rmDir(path);
-                    if (res == false)
+                    FolderItem item = itemList[i];
+                    string subpath = String.Concat(path, dirSeparator, item.filename);
+                    DeleteItem(subpath, item.filetype);
+                    //删除所有文件后，删除文件夹
+                    if (i == itemList.Count - 1)
                     {
-                        Debug.WriteLine(path + ":删除失败!");
-                    }
-                }
-                else
-                {
-                    foreach (FolderItem fItem in itemList)
-                    {
-                        if (fItem.filetype == FileType.File)//删除文件
-                        {
-                            string subpath = path + Path.DirectorySeparatorChar + fItem.filename;
-                            bool res = this.upYun.deleteFile(subpath);
-                            if (res == false)
-                            {
-                                Debug.WriteLine(path + ":删除失败!");
-                            }
-                        }
-                        else if (fItem.filetype == FileType.Dir)//删除目录
-                        {
-                            string subpath = path + Path.DirectorySeparatorChar + fItem.filename;
-                            bool res = DeleteDir(subpath);
-                            if (res == false)
-                            {
-                                Debug.WriteLine(path + ":删除失败!");
-                            }
-                        }
-                        else
-                        {
-                            Debug.WriteLine(path + ":删除失败!");
-                        }
+                        this.upYun.rmDir(path);
                     }
                 }
             }
-            catch
+
+        }
+
+        /// <summary>
+        /// 下载当前选中项
+        /// </summary>
+        private void DownloadSelectedItem()
+        {
+            if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
-                Debug.WriteLine(path + ":删除失败!");
-                return false;
+                ListViewItem lvItem = lvList.SelectedItems[0];
+                string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
+                string fileType = lvItem.Tag.ToString();
+                DownloadItem(path, fileType);
             }
-            return true;
+        }
+        /// <summary>
+        /// 下载文件或目录
+        /// </summary>
+        /// <param name="path">服务器路径</param>
+        /// <param name="fileType">F:目录，N:文件</param>
+        private void DownloadItem(string path, string fileType)
+        {
+            string localPath = String.Concat(this.downPath, path);
+            if (fileType == FileType.File)//文件直接下载
+            {
+                byte[] data = this.upYun.readFile(path);
+                File.WriteAllBytes(localPath, data);
+            }
+            else if (fileType == FileType.Dir)//目录递归下载
+            {
+                DownloadDir(path, localPath);
+            }
+        }
+        /// <summary>
+        /// 目录递归下载
+        /// </summary>
+        /// <param name="path">服务器路径</param>
+        /// <param name="localPath">本地下载路径</param>
+        private void DownloadDir(string path, string localPath)
+        {
+            if (!Directory.Exists(localPath))
+            {
+                Directory.CreateDirectory(localPath);
+            }
+            List<FolderItem> itemList = this.upYun.readDir(path);
+            if (itemList != null && itemList.Count > 0)
+            {
+                foreach (FolderItem item in itemList)
+                {
+                    string subPath = String.Concat(path, dirSeparator, item.filename);
+                    DownloadItem(subPath, item.filetype);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 下载选中项(多选)
+        /// </summary>
+        private void DownloadCheckedItems()
+        {
+            if (lvList.CheckedItems != null && lvList.CheckedItems.Count > 0)
+            {
+                foreach (ListViewItem lvItem in lvList.CheckedItems)
+                {
+                    string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
+                    string fileType = lvItem.Tag.ToString();
+                    DownloadItem(path, fileType);
+                }
+            }
         }
         #endregion
 
-        #region Event(s)
-
-        #region 普通事件
+        #region Form Events
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -406,20 +419,106 @@ namespace Filemanager_for_UPYUN
 
         private void MainForm_Load(object sender, System.EventArgs e)
         {
-            ListFileInfo(curPath);
+            RefreshList();
             lvList.ListViewItemSorter = new ListViewColumnSorter();
         }
+
+        #endregion
+
+        #region Menu Events
+        //新建文件夹
+        private void MenuItem_NewDir_Click(object sender, System.EventArgs e)
+        {
+            NewDir();
+        }
+
+        //上传文件
+        private void MenuItem_Upload_Click(object sender, EventArgs e)
+        {
+            UploadFile();
+        }
+
+        //刷新
+        private void MenuItem_Refresh_Click(object sender, EventArgs e)
+        {
+            RefreshList();
+        }
+
+        //重命名
+        private void MenuItem_Rename_Click(object sender, EventArgs e)
+        {
+            RenameItem(false);
+        }
+
+        //删除
+        private void MenuItem_Delete_Click(object sender, EventArgs e)
+        {
+            DeleteSelectedItem();
+        }
+
+        //打开文件夹
+        private void MenuItem_OpenDir_Click(object sender, EventArgs e)
+        {
+            OpenDir();
+        }
+
+        //下载
+        private void MenuItem_Download_Click(object sender, EventArgs e)
+        {
+            DownloadSelectedItem();
+        }
+
+        #endregion
+
+        #region Button Events
+
+        //显示主页按钮
+        private void btnHome_Click(object sender, EventArgs e)
+        {
+            this.curPath = "";
+            RefreshList();
+        }
+
+        //删除按钮
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            DeleteCheckedItems();
+        }
+
+        //下载按钮
+        private void btnDownload_Click(object sender, EventArgs e)
+        {
+            DownloadCheckedItems();
+        }
+
+        #endregion
+
+        #region ListView Events
+        //双击打开文件夹
+        private void lvList_DoubleClick(object sender, EventArgs e)
+        {
+            if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
+            {
+                ListViewItem lvItem = lvList.SelectedItems[0];
+                if (lvItem.Tag.ToString() == "F")
+                {
+                    OpenDir();
+                }
+            }
+        }
+
 
         //选中项改变时，切换右键菜单
         private void lvList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
             if (e.IsSelected)
             {
-                if (e.Item.Tag.ToString() == FileType.File)
+                string fileType = e.Item.Tag.ToString();
+                if (fileType == FileType.File)
                 {
                     SetMenuType(MenuType.File);
                 }
-                else if (e.Item.Tag.ToString() == FileType.Dir)
+                else if (fileType == FileType.Dir)
                 {
                     SetMenuType(MenuType.Dir);
                 }
@@ -505,71 +604,6 @@ namespace Filemanager_for_UPYUN
                 //RenameItem();
             }
         }
-
-        #endregion
-
-        //新建文件夹
-        private void MenuItem_NewDir_Click(object sender, System.EventArgs e)
-        {
-            NewDir();
-        }
-
-        //上传文件
-        private void MenuItem_Upload_Click(object sender, EventArgs e)
-        {
-            UploadFile();
-        }
-
-        //刷新
-        private void MenuItem_Refresh_Click(object sender, EventArgs e)
-        {
-            RefreshList();
-        }
-
-        //重命名
-        private void MenuItem_Rename_Click(object sender, EventArgs e)
-        {
-            RenameItem(false);
-        }
-
-        //删除
-        private void MenuItem_Delete_Click(object sender, EventArgs e)
-        {
-            DeleteItem();
-        }
-
-        //打开文件夹
-        private void MenuItem_OpenDir_Click(object sender, EventArgs e)
-        {
-            OpenDir();
-        }
-
-        //显示主页
-        private void btnHome_Click(object sender, EventArgs e)
-        {
-            this.curPath = "";
-            ListFileInfo(curPath);
-        }
-
-        //双击打开文件夹
-        private void lvList_DoubleClick(object sender, EventArgs e)
-        {
-            if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
-            {
-                ListViewItem lvItem = lvList.SelectedItems[0];
-                if (lvItem.Tag.ToString() == "F")
-                {
-                    OpenDir();
-                }
-            }
-        }
-
-        //删除选中项(多选)
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
-            DeleteCheckedItems();
-        }
-
 
         #endregion
 

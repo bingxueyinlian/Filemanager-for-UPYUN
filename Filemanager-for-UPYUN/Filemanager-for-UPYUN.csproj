@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileType.cs" />
     <Compile Include="IconUtils.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="LoginForm.cs">

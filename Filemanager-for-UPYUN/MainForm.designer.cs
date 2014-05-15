@@ -39,16 +39,19 @@
             this.defaultMenuItem_Refresh = new System.Windows.Forms.ToolStripMenuItem();
             this.imgList = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.btnDelete = new System.Windows.Forms.Button();
+            this.btnHome = new System.Windows.Forms.Button();
             this.chkAll = new System.Windows.Forms.CheckBox();
             this.fileContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.fileMenuItem_Download = new System.Windows.Forms.ToolStripMenuItem();
             this.fileMenuItem_Rename = new System.Windows.Forms.ToolStripMenuItem();
             this.fileMenuItem_Delete = new System.Windows.Forms.ToolStripMenuItem();
             this.dirContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.dirMenuItem_Rename = new System.Windows.Forms.ToolStripMenuItem();
             this.dirMenuItem_OpenDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.dirMenuItem_Download = new System.Windows.Forms.ToolStripMenuItem();
+            this.dirMenuItem_Rename = new System.Windows.Forms.ToolStripMenuItem();
             this.dirMenuItem_Delete = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnHome = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
+            this.btnDownload = new System.Windows.Forms.Button();
             this.defaultContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -132,8 +135,8 @@
             // 
             // imgList
             // 
-            this.imgList.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imgList.ImageSize = new System.Drawing.Size(16, 16);
+            this.imgList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imgList.ImageSize = new System.Drawing.Size(21, 21);
             this.imgList.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // splitContainer1
@@ -145,6 +148,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.btnDownload);
             this.splitContainer1.Panel1.Controls.Add(this.btnDelete);
             this.splitContainer1.Panel1.Controls.Add(this.btnHome);
             // 
@@ -155,6 +159,28 @@
             this.splitContainer1.Size = new System.Drawing.Size(586, 461);
             this.splitContainer1.SplitterDistance = 44;
             this.splitContainer1.TabIndex = 2;
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnDelete.Location = new System.Drawing.Point(84, 19);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.TabIndex = 0;
+            this.btnDelete.Text = "删除";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            // 
+            // btnHome
+            // 
+            this.btnHome.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnHome.Location = new System.Drawing.Point(3, 19);
+            this.btnHome.Name = "btnHome";
+            this.btnHome.Size = new System.Drawing.Size(75, 23);
+            this.btnHome.TabIndex = 0;
+            this.btnHome.Text = "主页";
+            this.btnHome.UseVisualStyleBackColor = true;
+            this.btnHome.Click += new System.EventHandler(this.btnHome_Click);
             // 
             // chkAll
             // 
@@ -170,10 +196,18 @@
             // fileContextMenu
             // 
             this.fileContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileMenuItem_Download,
             this.fileMenuItem_Rename,
             this.fileMenuItem_Delete});
             this.fileContextMenu.Name = "fileContextMenu";
-            this.fileContextMenu.Size = new System.Drawing.Size(113, 48);
+            this.fileContextMenu.Size = new System.Drawing.Size(113, 70);
+            // 
+            // fileMenuItem_Download
+            // 
+            this.fileMenuItem_Download.Name = "fileMenuItem_Download";
+            this.fileMenuItem_Download.Size = new System.Drawing.Size(112, 22);
+            this.fileMenuItem_Download.Text = "下载";
+            this.fileMenuItem_Download.Click += new System.EventHandler(this.MenuItem_Download_Click);
             // 
             // fileMenuItem_Rename
             // 
@@ -193,11 +227,26 @@
             // dirContextMenu
             // 
             this.dirContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dirMenuItem_Rename,
             this.dirMenuItem_OpenDir,
+            this.dirMenuItem_Download,
+            this.dirMenuItem_Rename,
             this.dirMenuItem_Delete});
             this.dirContextMenu.Name = "dirContextMenu";
-            this.dirContextMenu.Size = new System.Drawing.Size(113, 70);
+            this.dirContextMenu.Size = new System.Drawing.Size(113, 92);
+            // 
+            // dirMenuItem_OpenDir
+            // 
+            this.dirMenuItem_OpenDir.Name = "dirMenuItem_OpenDir";
+            this.dirMenuItem_OpenDir.Size = new System.Drawing.Size(112, 22);
+            this.dirMenuItem_OpenDir.Text = "打开";
+            this.dirMenuItem_OpenDir.Click += new System.EventHandler(this.MenuItem_OpenDir_Click);
+            // 
+            // dirMenuItem_Download
+            // 
+            this.dirMenuItem_Download.Name = "dirMenuItem_Download";
+            this.dirMenuItem_Download.Size = new System.Drawing.Size(112, 22);
+            this.dirMenuItem_Download.Text = "下载";
+            this.dirMenuItem_Download.Click += new System.EventHandler(this.MenuItem_Download_Click);
             // 
             // dirMenuItem_Rename
             // 
@@ -207,13 +256,6 @@
             this.dirMenuItem_Rename.Visible = false;
             this.dirMenuItem_Rename.Click += new System.EventHandler(this.MenuItem_Rename_Click);
             // 
-            // dirMenuItem_OpenDir
-            // 
-            this.dirMenuItem_OpenDir.Name = "dirMenuItem_OpenDir";
-            this.dirMenuItem_OpenDir.Size = new System.Drawing.Size(112, 22);
-            this.dirMenuItem_OpenDir.Text = "打开";
-            this.dirMenuItem_OpenDir.Click += new System.EventHandler(this.MenuItem_OpenDir_Click);
-            // 
             // dirMenuItem_Delete
             // 
             this.dirMenuItem_Delete.Name = "dirMenuItem_Delete";
@@ -221,27 +263,16 @@
             this.dirMenuItem_Delete.Text = "删除";
             this.dirMenuItem_Delete.Click += new System.EventHandler(this.MenuItem_Delete_Click);
             // 
-            // btnHome
+            // btnDownload
             // 
-            this.btnHome.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.btnHome.Location = new System.Drawing.Point(3, 19);
-            this.btnHome.Name = "btnHome";
-            this.btnHome.Size = new System.Drawing.Size(75, 23);
-            this.btnHome.TabIndex = 0;
-            this.btnHome.Text = "主页";
-            this.btnHome.UseVisualStyleBackColor = true;
-            this.btnHome.Click += new System.EventHandler(this.btnHome_Click);
-            // 
-            // btnDelete
-            // 
-            this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.btnDelete.Location = new System.Drawing.Point(84, 19);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(75, 23);
-            this.btnDelete.TabIndex = 0;
-            this.btnDelete.Text = "删除";
-            this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            this.btnDownload.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnDownload.Location = new System.Drawing.Point(165, 18);
+            this.btnDownload.Name = "btnDownload";
+            this.btnDownload.Size = new System.Drawing.Size(75, 23);
+            this.btnDownload.TabIndex = 0;
+            this.btnDownload.Text = "下载";
+            this.btnDownload.UseVisualStyleBackColor = true;
+            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
             // 
             // MainForm
             // 
@@ -288,5 +319,8 @@
         private System.Windows.Forms.ToolStripMenuItem dirMenuItem_OpenDir;
         private System.Windows.Forms.Button btnHome;
         private System.Windows.Forms.Button btnDelete;
+        private System.Windows.Forms.ToolStripMenuItem fileMenuItem_Download;
+        private System.Windows.Forms.ToolStripMenuItem dirMenuItem_Download;
+        private System.Windows.Forms.Button btnDownload;
     }
 }
