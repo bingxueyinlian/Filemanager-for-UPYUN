@@ -8,7 +8,7 @@ namespace Filemanager_for_UPYUN
     /// <summary>
     /// 右键菜单类型
     /// </summary>
-    enum MenuType
+    public enum MenuType
     {
         /// <summary>
         /// 文件菜单
@@ -24,5 +24,5 @@ namespace Filemanager_for_UPYUN
         Default
     }
 
-   
+
 }

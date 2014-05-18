@@ -7,7 +7,7 @@ namespace Filemanager_for_UPYUN
     /// <summary>
     /// 引用自:http://www.csharpwin.com/csharpspace/10907r150.shtml
     /// </summary>
-    class IconUtils
+    public class IconUtils
     {
         /// <summary>
         /// Used to access system folder icons.

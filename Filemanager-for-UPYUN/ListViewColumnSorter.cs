@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Windows.Forms;
 
 namespace Filemanager_for_UPYUN
@@ -52,8 +53,8 @@ namespace Filemanager_for_UPYUN
             listviewY = (ListViewItem)y;
             if (ColumnToSort == 1) //added
             {
-                int sizeX = int.Parse(listviewX.SubItems[ColumnToSort].Text.Replace(",", ""));
-                int sizeY = int.Parse(listviewY.SubItems[ColumnToSort].Text.Replace(",", ""));
+                int sizeX = Convert.ToInt32(listviewX.SubItems[ColumnToSort].Tag);
+                int sizeY = Convert.ToInt32(listviewY.SubItems[ColumnToSort].Tag);
                 compareResult = ObjectCompare.Compare(sizeX, sizeY);
             }
             else

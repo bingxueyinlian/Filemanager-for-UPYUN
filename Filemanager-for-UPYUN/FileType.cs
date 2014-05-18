@@ -8,7 +8,7 @@ namespace Filemanager_for_UPYUN
     /// <summary>
     /// 文件类型
     /// </summary>
-    class FileType
+    public class FileType
     {
         /// <summary>
         /// 目录:F

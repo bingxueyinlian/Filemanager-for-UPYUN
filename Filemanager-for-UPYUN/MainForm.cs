@@ -11,8 +11,8 @@ namespace Filemanager_for_UPYUN
     public partial class MainForm : Form
     {
         #region Variable
-        private const char sortAsc = '↑';// (char)0x25b2;
-        private const char sortDesc = '↓';//(char)0x25bc;
+        private const char sortAsc = '↑';//排序标记，升序
+        private const char sortDesc = '↓';//排序标记，降序
         private readonly string dirSeparator = Path.DirectorySeparatorChar.ToString();//目录分隔符
         private UpYun upYun;
         private string curPath = "";//当前路径
@@ -37,7 +37,7 @@ namespace Filemanager_for_UPYUN
 
         #region Private Mothods
 
-        private void SetMenuType(MenuType mt)
+        private void SetContextMenu(MenuType mt)
         {
             switch (mt)
             {
@@ -63,6 +63,8 @@ namespace Filemanager_for_UPYUN
         private void ListFileInfo(string path)
         {
             lvList.Items.Clear();
+            SetUrlBar(path);
+            SetContextMenu(MenuType.Default);
             List<FolderItem> itemList = this.upYun.readDir(path);
             if (itemList != null && itemList.Count > 0)
             {
@@ -70,34 +72,35 @@ namespace Filemanager_for_UPYUN
                 var tempList = itemList.OrderBy(p => p.filetype).ThenBy(p => Path.GetExtension(p.filename));
                 foreach (var item in tempList)
                 {
+                    //转换为实际的北京时间
                     string modiDate = new DateTime(TimeSpan.FromSeconds(item.number).Add(new TimeSpan(Jan1st1970.Ticks)).Ticks).AddHours(8).ToString("yyyy-MM-dd HH:mm");
+                    string fileType = item.filetype;
                     ListViewItem lvItem = new ListViewItem(new string[] { 
                         item.filename,
-                        //GetSizeWithUnit(item.size),
-                        item.size.ToString("N0"),
+                        fileType == FileType.Dir ? "-" : GetSizeWithUnit(item.size),
                         modiDate
                     });
-                    lvItem.Tag = item.filetype;//用Tag来保存文件类型，便于切换右键菜单
+                    lvItem.Tag = fileType;//用第一列的Tag来保存文件类型，便于切换右键菜单
                     lvList.Items.Add(lvItem);
                     //获取默认打开图片
                     string ext = "";
-                    if (item.filetype == FileType.File)
+                    if (fileType == FileType.File)
                     {
                         ext = Path.GetExtension(item.filename);
                     }
-                    else if (item.filetype == FileType.Dir)
+                    else if (fileType == FileType.Dir)
                     {
                         ext = "DIR";
                     }
                     //绑定到ImageList中
                     if (!imgList.Images.ContainsKey(ext))
                     {
-                        if (item.filetype == FileType.File)
+                        if (fileType == FileType.File)
                         {
                             Icon icon = IconUtils.GetIconForFileExtension(ext, false, false);
                             imgList.Images.Add(ext, icon);
                         }
-                        else if (item.filetype == FileType.Dir)
+                        else if (fileType == FileType.Dir)
                         {
                             Icon icon = IconUtils.GetIconForFolder(false, false);
                             imgList.Images.Add(ext, icon);
@@ -109,29 +112,69 @@ namespace Filemanager_for_UPYUN
             }
         }
 
+        //设置当前显示路径
+        private void SetUrlBar(string path)
+        {
+            //清除当前项后面的路径
+            for (int i = tsUrlBar.Items.Count - 1; i > 1; i--)
+            {
+                ToolStripItem item = tsUrlBar.Items[i];
+                if (item.Name == "tsbHome" || item.Name == "tsbDefaultArrow")
+                {
+                    continue;//不移除主页和第一个箭头
+                }
+                else
+                {
+                    tsUrlBar.Items.Remove(item);
+                }
+            }
+            //设置新路径
+            string[] items = path.Split(new string[] { dirSeparator }, StringSplitOptions.RemoveEmptyEntries);
+            if (items != null && items.Length > 0)
+            {
+                string filePath = String.Empty;
+                foreach (string fileName in items)
+                {
+                    ToolStripItem itemFileName = new ToolStripButton();
+                    itemFileName.Text = fileName;
+                    filePath = String.Concat(filePath, dirSeparator, fileName); //用来保存路径
+                    itemFileName.Tag = filePath;
+                    itemFileName.Click += delegate(object sender, EventArgs e)
+                    {
+                        this.curPath = itemFileName.Tag.ToString();
+                        RefreshList();
+                    };
+                    ToolStripItem itemArrow = new ToolStripLabel();
+                    itemArrow.Image = tsbDefaultArrow.Image;
+                    tsUrlBar.Items.Add(itemFileName);
+                    tsUrlBar.Items.Add(itemArrow);
+                }
+            }
+        }
+
         /// <summary>
         /// 获取文件大小(带单位)
         /// </summary>
         /// <param name="size"></param>
         /// <returns></returns>
-        private string GetSizeWithUnit(int size)
+        private string GetSizeWithUnit(double size)
         {
-            string result = size.ToString();
+            string result = size.ToString("N2");
 
             if (size >= Math.Pow(1024, 3) && size < Math.Pow(1024, 4))
             {
-                result = (size / Math.Pow(1024, 3)) + "G";
+                result = (size / Math.Pow(1024, 3)).ToString("N2") + "G";
             }
             else if (size >= Math.Pow(1024, 2))
             {
-                result = (size / Math.Pow(1024, 2)) + "M";
+                result = (size / Math.Pow(1024, 2)).ToString("N2") + "M";
             }
             else if (size >= 1024)
             {
-                result = (size / 1024) + "K";
+                result = (size / 1024).ToString("N2") + "K";
             }
-            result += "B";
 
+            result += "B";
             return result;
         }
 
@@ -144,14 +187,14 @@ namespace Filemanager_for_UPYUN
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 string[] fileNames = dlg.FileNames;
-                foreach (string fName in fileNames)
+                foreach (string fileName in fileNames)
                 {
-                    byte[] data = File.ReadAllBytes(fName);
-                    this.upYun.setContentMD5(UpYun.md5_file(fName));
+                    byte[] data = File.ReadAllBytes(fileName);
+                    this.upYun.setContentMD5(UpYun.md5_file(fileName));
                     bool res = false;
                     try
                     {
-                        string path = String.Concat(this.curPath, dirSeparator, Path.GetFileName(fName));
+                        string path = String.Concat(this.curPath, dirSeparator, Path.GetFileName(fileName));
                         res = this.upYun.writeFile(path, data, false);
                         if (res)
                         {
@@ -165,7 +208,7 @@ namespace Filemanager_for_UPYUN
                     }
                     if (!res)
                     {
-                        Debug.WriteLine(fName + ":上传失败!");
+                        Debug.WriteLine(fileName + ":上传失败!");
                     }
                 }
             }
@@ -209,7 +252,6 @@ namespace Filemanager_for_UPYUN
                 ListViewItem item = lvList.SelectedItems[0];
                 this.curPath = String.Concat(this.curPath, dirSeparator, item.Text);
                 RefreshList();
-                SetMenuType(MenuType.Default);
             }
         }
 
@@ -253,7 +295,6 @@ namespace Filemanager_for_UPYUN
                 Graphics g = CreateGraphics();
                 SizeF sf = g.MeasureString(fileName, item.Font);
                 textBox.Width = (int)sf.Width + 10;
-                //textBox.Height = 16;
                 lvList.Controls.Add(textBox);
                 textBox.Focus();
                 textBox.Select(0, fileName.Length - Path.GetExtension(fileName).Length);
@@ -267,10 +308,17 @@ namespace Filemanager_for_UPYUN
         {
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
-                ListViewItem lvItem = lvList.SelectedItems[0];
-                string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
-                DeleteItem(path, lvItem.Tag.ToString());
-                lvList.Items.Remove(lvItem);
+                if (MessageBox.Show("删除后将无法恢复，您确认要删除吗？") == DialogResult.OK)
+                {
+                    ListViewItem lvItem = lvList.SelectedItems[0];
+                    string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
+                    DeleteItem(path, lvItem.Tag.ToString());
+                    RefreshList();
+                }
+            }
+            else
+            {
+                MessageBox.Show("请选择要删除的文件或目录");
             }
         }
 
@@ -281,13 +329,20 @@ namespace Filemanager_for_UPYUN
         {
             if (lvList.CheckedItems != null && lvList.CheckedItems.Count > 0)
             {
-                foreach (ListViewItem lvItem in lvList.CheckedItems)
+                if (MessageBox.Show("删除后将无法恢复，您确认要删除吗？") == DialogResult.OK)
                 {
-                    string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
-                    string fileType = lvItem.Tag.ToString();
-                    DeleteItem(path, fileType);
+                    foreach (ListViewItem lvItem in lvList.CheckedItems)
+                    {
+                        string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
+                        string fileType = lvItem.Tag.ToString();
+                        DeleteItem(path, fileType);
+                    }
+                    RefreshList();
                 }
-                RefreshList();
+            }
+            else
+            {
+                MessageBox.Show("请勾选要删除的文件或目录");
             }
         }
 
@@ -341,26 +396,28 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
-        /// 下载当前选中项
+        /// 下载当前选中项[右键]
         /// </summary>
         private void DownloadSelectedItem()
         {
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
-                ListViewItem lvItem = lvList.SelectedItems[0];
-                string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
-                string fileType = lvItem.Tag.ToString();
-                DownloadItem(path, fileType);
+                ListViewItem item = lvList.SelectedItems[0];
+                string fileType = item.Tag.ToString();
+                string fileName = item.Text;
+                string path = String.Concat(this.curPath, dirSeparator, fileName);
+                string localPath = String.Concat(this.downPath, dirSeparator, fileName);
+                DownloadItem(path, localPath, fileType);
             }
         }
         /// <summary>
         /// 下载文件或目录
         /// </summary>
         /// <param name="path">服务器路径</param>
+        /// <param name="localPath">本地路径</param>
         /// <param name="fileType">F:目录，N:文件</param>
-        private void DownloadItem(string path, string fileType)
+        private void DownloadItem(string path, string localPath, string fileType)
         {
-            string localPath = String.Concat(this.downPath, path);
             if (fileType == FileType.File)//文件直接下载
             {
                 byte[] data = this.upYun.readFile(path);
@@ -387,8 +444,10 @@ namespace Filemanager_for_UPYUN
             {
                 foreach (FolderItem item in itemList)
                 {
-                    string subPath = String.Concat(path, dirSeparator, item.filename);
-                    DownloadItem(subPath, item.filetype);
+                    string fileName = item.filename;
+                    string subPath = String.Concat(path, dirSeparator, fileName);
+                    string sublocalPath = String.Concat(localPath, dirSeparator, fileName);
+                    DownloadItem(subPath, sublocalPath, item.filetype);
                 }
             }
         }
@@ -400,11 +459,13 @@ namespace Filemanager_for_UPYUN
         {
             if (lvList.CheckedItems != null && lvList.CheckedItems.Count > 0)
             {
-                foreach (ListViewItem lvItem in lvList.CheckedItems)
+                foreach (ListViewItem item in lvList.CheckedItems)
                 {
-                    string path = String.Concat(this.curPath, dirSeparator, lvItem.Text);
-                    string fileType = lvItem.Tag.ToString();
-                    DownloadItem(path, fileType);
+                    string fileType = item.Tag.ToString();
+                    string fileName = item.Text;
+                    string path = String.Concat(this.curPath, dirSeparator, fileName);
+                    string localpath = String.Concat(this.downPath, dirSeparator, fileName);
+                    DownloadItem(path, localpath, fileType);
                 }
             }
         }
@@ -439,7 +500,7 @@ namespace Filemanager_for_UPYUN
         }
 
         //刷新
-        private void MenuItem_Refresh_Click(object sender, EventArgs e)
+        private void Refresh_Click(object sender, EventArgs e)
         {
             RefreshList();
         }
@@ -491,6 +552,18 @@ namespace Filemanager_for_UPYUN
             DownloadCheckedItems();
         }
 
+        //上传按钮
+        private void btnUpload_Click(object sender, EventArgs e)
+        {
+            UploadFile();
+        }
+
+        //新建文件夹
+        private void btnNewDir_Click(object sender, EventArgs e)
+        {
+            NewDir();
+        }
+
         #endregion
 
         #region ListView Events
@@ -516,20 +589,20 @@ namespace Filemanager_for_UPYUN
                 string fileType = e.Item.Tag.ToString();
                 if (fileType == FileType.File)
                 {
-                    SetMenuType(MenuType.File);
+                    SetContextMenu(MenuType.File);
                 }
                 else if (fileType == FileType.Dir)
                 {
-                    SetMenuType(MenuType.Dir);
+                    SetContextMenu(MenuType.Dir);
                 }
                 else
                 {
-                    SetMenuType(MenuType.Default);
+                    SetContextMenu(MenuType.Default);
                 }
             }
             else
             {
-                SetMenuType(MenuType.Default);
+                SetContextMenu(MenuType.Default);
             }
         }
 
@@ -606,6 +679,7 @@ namespace Filemanager_for_UPYUN
         }
 
         #endregion
+
 
     }
 }
