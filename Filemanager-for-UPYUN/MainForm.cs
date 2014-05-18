@@ -75,12 +75,14 @@ namespace Filemanager_for_UPYUN
                     //转换为实际的北京时间
                     string modiDate = new DateTime(TimeSpan.FromSeconds(item.number).Add(new TimeSpan(Jan1st1970.Ticks)).Ticks).AddHours(8).ToString("yyyy-MM-dd HH:mm");
                     string fileType = item.filetype;
+                    int fileSize = item.size;
                     ListViewItem lvItem = new ListViewItem(new string[] { 
                         item.filename,
-                        fileType == FileType.Dir ? "-" : GetSizeWithUnit(item.size),
+                        fileType == FileType.Dir ? "-" : GetSizeWithUnit(fileSize),
                         modiDate
                     });
                     lvItem.Tag = fileType;//用第一列的Tag来保存文件类型，便于切换右键菜单
+                    lvItem.SubItems[1].Tag = fileSize;//用第二列的Tag保存文件大小，便于排序用
                     lvList.Items.Add(lvItem);
                     //获取默认打开图片
                     string ext = "";
@@ -632,16 +634,22 @@ namespace Filemanager_for_UPYUN
                     lvColSorter.Order = SortOrder.Ascending;
                 }
 
-                //清除排序标记
-                foreach (ColumnHeader header in lvList.Columns)
-                {
-                    header.Text = header.Text.TrimEnd(sortAsc).TrimEnd(sortDesc).TrimEnd();
-                }
+                ClearSort();
                 lvList.Columns[e.Column].Text += ((lvColSorter.Order == SortOrder.Ascending) ? sortAsc : sortDesc);
                 lv.Sort();
 
             }
 
+        }
+        /// <summary>
+        /// 清除排序标记
+        /// </summary>
+        private void ClearSort()
+        {
+            foreach (ColumnHeader header in lvList.Columns)
+            {
+                header.Text = header.Text.TrimEnd(sortAsc).TrimEnd(sortDesc).TrimEnd();
+            }
         }
 
         //全选(反选)
