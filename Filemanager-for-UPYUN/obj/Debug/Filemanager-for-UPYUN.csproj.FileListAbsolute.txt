@@ -1,6 +1,7 @@
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\bin\Debug\Filemanager-for-UPYUN.exe
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\bin\Debug\Filemanager-for-UPYUN.pdb
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\bin\Debug\System.Data.SQLite.dll
+D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filemanager-for-UPYUN.csprojResolveAssemblyReference.cache
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filemanager_for_UPYUN.LoginForm.resources
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filemanager_for_UPYUN.MainForm.resources
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filemanager_for_UPYUN.Properties.Resources.resources
