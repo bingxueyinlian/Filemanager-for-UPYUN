@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 
 namespace Filemanager_for_UPYUN
@@ -27,10 +28,11 @@ namespace Filemanager_for_UPYUN
             InitializeComponent();
         }
 
-        public MainForm(UpYun upY)
+        public MainForm(UpYun upY, int bucketUsage)
         {
             InitializeComponent();
             this.upYun = upY;
+            this.lblBucketUsage.Text = GetSizeWithUnit(bucketUsage);
         }
 
         #endregion
@@ -64,6 +66,7 @@ namespace Filemanager_for_UPYUN
         {
             lvList.Items.Clear();
             SetUrlBar(path);
+            chkAll.Checked = false;
             SetContextMenu(MenuType.Default);
             List<FolderItem> itemList = this.upYun.readDir(path);
             if (itemList != null && itemList.Count > 0)
@@ -75,9 +78,14 @@ namespace Filemanager_for_UPYUN
                     //转换为实际的北京时间
                     string modiDate = new DateTime(TimeSpan.FromSeconds(item.number).Add(new TimeSpan(Jan1st1970.Ticks)).Ticks).AddHours(8).ToString("yyyy-MM-dd HH:mm");
                     string fileType = item.filetype;
+                    string fileName = item.filename;
+                    if (path == String.Empty && fileName == "fm.db")//不显示DB配置文件
+                    {
+                        continue;
+                    }
                     int fileSize = item.size;
                     ListViewItem lvItem = new ListViewItem(new string[] { 
-                        item.filename,
+                        fileName,
                         fileType == FileType.Dir ? "-" : GetSizeWithUnit(fileSize),
                         modiDate
                     });
@@ -110,6 +118,15 @@ namespace Filemanager_for_UPYUN
                     }
 
                     lvItem.ImageKey = ext;
+                    string serverPath = string.Concat(path, dirSeparator, fileName);
+                    FileDto fileDto = new FileDto()
+                    {
+                        ServerPath = serverPath,
+                        ServerName = fileName,
+                        LocalPath = serverPath,
+                        LocalName = fileName
+                    };
+                    DbUtil.Save(fileDto);
                 }
             }
         }
@@ -186,6 +203,7 @@ namespace Filemanager_for_UPYUN
         private void UploadFile()
         {
             OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Multiselect = true;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 string[] fileNames = dlg.FileNames;
@@ -265,6 +283,7 @@ namespace Filemanager_for_UPYUN
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
                 ListViewItem item = lvList.SelectedItems[0];
+                string fileName = item.Text;
                 TextBox textBox = new TextBox();
                 textBox.Location = new System.Drawing.Point(item.Bounds.Left + 35, item.Bounds.Top);
                 textBox.KeyDown += delegate(object sender, KeyEventArgs e)
@@ -276,22 +295,18 @@ namespace Filemanager_for_UPYUN
                 };
                 textBox.LostFocus += delegate(object sender, EventArgs e)
                 {
-                    if (item.Text != textBox.Text)
+
+                    if (fileName != textBox.Text)
                     {
-                        item.Text = textBox.Text;
+                        fileName = textBox.Text;
                     }
                     lvList.Controls.Remove(textBox);
                     if (isNewDir)
                     {
-                        string path = String.Concat(this.curPath, dirSeparator, item.Text);
-                        bool res = this.upYun.mkDir(path, false);
-                        if (!res)
-                        {
-                            Debug.WriteLine(path + ":新建失败!");
-                        }
+                        string path = String.Concat(this.curPath, dirSeparator, fileName);
+                        this.upYun.mkDir(path, false);
                     }
                 };
-                string fileName = item.Text;
                 textBox.Text = fileName;
                 //计算文字宽度
                 Graphics g = CreateGraphics();
@@ -482,6 +497,20 @@ namespace Filemanager_for_UPYUN
 
         private void MainForm_Load(object sender, System.EventArgs e)
         {
+            string localFileName = DbUtil.DbFileName;
+            string dbFile = String.Concat(this.curPath, dirSeparator, localFileName);
+            try
+            {
+                DownloadItem(dbFile, localFileName, FileType.File);
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse res = (HttpWebResponse)ex.Response;
+                if ((int)res.StatusCode == 404)
+                {
+                    DbUtil.CreateDB();
+                }
+            }
             RefreshList();
             lvList.ListViewItemSorter = new ListViewColumnSorter();
         }
@@ -574,8 +603,8 @@ namespace Filemanager_for_UPYUN
         {
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
-                ListViewItem lvItem = lvList.SelectedItems[0];
-                if (lvItem.Tag.ToString() == "F")
+                ListViewItem item = lvList.SelectedItems[0];
+                if (item.Tag.ToString() == "F")
                 {
                     OpenDir();
                 }
@@ -676,6 +705,17 @@ namespace Filemanager_for_UPYUN
                 chkAll.Checked = true;
             }
         }
+        //取消双击时勾选的默认效果
+        private void lvList_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Clicks > 1)
+            {
+                ListViewItem item = this.lvList.GetItemAt(e.X, e.Y);
+                if (item == null)
+                    return;
+                item.Checked = !item.Checked;
+            }
+        }
 
         //F2重命名
         private void lvList_KeyDown(object sender, KeyEventArgs e)
@@ -687,7 +727,6 @@ namespace Filemanager_for_UPYUN
         }
 
         #endregion
-
 
     }
 }

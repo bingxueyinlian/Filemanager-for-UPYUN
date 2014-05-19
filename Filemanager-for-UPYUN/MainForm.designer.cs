@@ -66,6 +66,10 @@
             this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.panel7 = new System.Windows.Forms.Panel();
+            this.panel8 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblBucketUsage = new System.Windows.Forms.Label();
             this.defaultContextMenu.SuspendLayout();
             this.toolStripTop.SuspendLayout();
             this.fileContextMenu.SuspendLayout();
@@ -78,6 +82,8 @@
             this.toolStrip2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.panel7.SuspendLayout();
+            this.panel8.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvList
@@ -104,6 +110,7 @@
             this.lvList.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvList_ItemSelectionChanged);
             this.lvList.DoubleClick += new System.EventHandler(this.lvList_DoubleClick);
             this.lvList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lvList_KeyDown);
+            this.lvList.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lvList_MouseDown);
             // 
             // colFileName
             // 
@@ -174,17 +181,17 @@
             // 
             // toolStripTop
             // 
-            this.toolStripTop.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStripTop.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStripTop.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStripTop.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbUpload,
             this.tsbDownload,
             this.tsbNewDir,
             this.tsbDelete});
-            this.toolStripTop.Location = new System.Drawing.Point(0, 0);
+            this.toolStripTop.Location = new System.Drawing.Point(0, 1);
             this.toolStripTop.Name = "toolStripTop";
             this.toolStripTop.Padding = new System.Windows.Forms.Padding(10, 0, 1, 0);
-            this.toolStripTop.Size = new System.Drawing.Size(586, 30);
+            this.toolStripTop.Size = new System.Drawing.Size(257, 25);
             this.toolStripTop.TabIndex = 1;
             this.toolStripTop.Text = "toolStrip1";
             // 
@@ -193,7 +200,7 @@
             this.tsbUpload.Image = ((System.Drawing.Image)(resources.GetObject("tsbUpload.Image")));
             this.tsbUpload.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbUpload.Name = "tsbUpload";
-            this.tsbUpload.Size = new System.Drawing.Size(52, 27);
+            this.tsbUpload.Size = new System.Drawing.Size(52, 22);
             this.tsbUpload.Text = "上传";
             this.tsbUpload.Click += new System.EventHandler(this.btnUpload_Click);
             // 
@@ -202,7 +209,7 @@
             this.tsbDownload.Image = ((System.Drawing.Image)(resources.GetObject("tsbDownload.Image")));
             this.tsbDownload.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbDownload.Name = "tsbDownload";
-            this.tsbDownload.Size = new System.Drawing.Size(52, 27);
+            this.tsbDownload.Size = new System.Drawing.Size(52, 22);
             this.tsbDownload.Text = "下载";
             this.tsbDownload.Click += new System.EventHandler(this.btnDownload_Click);
             // 
@@ -211,7 +218,7 @@
             this.tsbNewDir.Image = ((System.Drawing.Image)(resources.GetObject("tsbNewDir.Image")));
             this.tsbNewDir.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbNewDir.Name = "tsbNewDir";
-            this.tsbNewDir.Size = new System.Drawing.Size(88, 27);
+            this.tsbNewDir.Size = new System.Drawing.Size(88, 22);
             this.tsbNewDir.Text = "新建文件夹";
             this.tsbNewDir.Click += new System.EventHandler(this.btnNewDir_Click);
             // 
@@ -220,7 +227,7 @@
             this.tsbDelete.Image = ((System.Drawing.Image)(resources.GetObject("tsbDelete.Image")));
             this.tsbDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbDelete.Name = "tsbDelete";
-            this.tsbDelete.Size = new System.Drawing.Size(52, 27);
+            this.tsbDelete.Size = new System.Drawing.Size(52, 22);
             this.tsbDelete.Text = "删除";
             this.tsbDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
@@ -243,10 +250,10 @@
             // 
             // fileMenuItem_Rename
             // 
+            this.fileMenuItem_Rename.Image = ((System.Drawing.Image)(resources.GetObject("fileMenuItem_Rename.Image")));
             this.fileMenuItem_Rename.Name = "fileMenuItem_Rename";
             this.fileMenuItem_Rename.Size = new System.Drawing.Size(112, 22);
             this.fileMenuItem_Rename.Text = "重命名";
-            this.fileMenuItem_Rename.Visible = false;
             this.fileMenuItem_Rename.Click += new System.EventHandler(this.MenuItem_Rename_Click);
             // 
             // fileMenuItem_Delete
@@ -285,10 +292,10 @@
             // 
             // dirMenuItem_Rename
             // 
+            this.dirMenuItem_Rename.Image = ((System.Drawing.Image)(resources.GetObject("dirMenuItem_Rename.Image")));
             this.dirMenuItem_Rename.Name = "dirMenuItem_Rename";
             this.dirMenuItem_Rename.Size = new System.Drawing.Size(112, 22);
             this.dirMenuItem_Rename.Text = "重命名";
-            this.dirMenuItem_Rename.Visible = false;
             this.dirMenuItem_Rename.Click += new System.EventHandler(this.MenuItem_Rename_Click);
             // 
             // dirMenuItem_Delete
@@ -397,7 +404,8 @@
             // 
             // panel3
             // 
-            this.panel3.Controls.Add(this.toolStripTop);
+            this.panel3.Controls.Add(this.panel8);
+            this.panel3.Controls.Add(this.panel7);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel3.Name = "panel3";
@@ -414,6 +422,42 @@
             this.panel2.Size = new System.Drawing.Size(586, 401);
             this.panel2.TabIndex = 5;
             // 
+            // panel7
+            // 
+            this.panel7.Controls.Add(this.lblBucketUsage);
+            this.panel7.Controls.Add(this.label1);
+            this.panel7.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel7.Location = new System.Drawing.Point(406, 0);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(180, 30);
+            this.panel7.TabIndex = 2;
+            // 
+            // panel8
+            // 
+            this.panel8.Controls.Add(this.toolStripTop);
+            this.panel8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel8.Location = new System.Drawing.Point(0, 0);
+            this.panel8.Name = "panel8";
+            this.panel8.Size = new System.Drawing.Size(406, 30);
+            this.panel8.TabIndex = 3;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(65, 12);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "已用空间：";
+            // 
+            // lblBucketUsage
+            // 
+            this.lblBucketUsage.AutoSize = true;
+            this.lblBucketUsage.Location = new System.Drawing.Point(77, 9);
+            this.lblBucketUsage.Name = "lblBucketUsage";
+            this.lblBucketUsage.Size = new System.Drawing.Size(0, 12);
+            this.lblBucketUsage.TabIndex = 1;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -423,7 +467,7 @@
             this.Controls.Add(this.panel1);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MainForm";
+            this.Text = "Up云文件管理";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.defaultContextMenu.ResumeLayout(false);
@@ -442,9 +486,12 @@
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
             this.panel3.ResumeLayout(false);
-            this.panel3.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            this.panel7.ResumeLayout(false);
+            this.panel7.PerformLayout();
+            this.panel8.ResumeLayout(false);
+            this.panel8.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -487,5 +534,9 @@
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripTextBox tsbSearch;
+        private System.Windows.Forms.Panel panel8;
+        private System.Windows.Forms.Panel panel7;
+        private System.Windows.Forms.Label lblBucketUsage;
+        private System.Windows.Forms.Label label1;
     }
 }

@@ -20,16 +20,16 @@ namespace Filemanager_for_UPYUN
             //upyun.setAuthType(true);//使用UPYUN签名认证
             try
             {
-                upyun.getBucketUsage();
+                int bucketUsage = upyun.getBucketUsage();
+                MainForm mainForm = new MainForm(upyun, bucketUsage);
+                mainForm.Show();
+                this.Hide();
             }
             catch
             {
-                MessageBox.Show("输入的信息有误!");
-                return;
+                MessageBox.Show("操作失败!");
             }
-            MainForm mainForm = new MainForm(upyun);
-            mainForm.Show();
-            this.Hide();
+
         }
 
     }
