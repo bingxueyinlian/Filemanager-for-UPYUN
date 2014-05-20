@@ -56,34 +56,44 @@
             this.dirMenuItem_Delete = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.panel5 = new System.Windows.Forms.Panel();
-            this.tsUrlBar = new System.Windows.Forms.ToolStrip();
-            this.tsbHome = new System.Windows.Forms.ToolStripButton();
-            this.tsbDefaultArrow = new System.Windows.Forms.ToolStripLabel();
-            this.panel6 = new System.Windows.Forms.Panel();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.tsUrlBar = new System.Windows.Forms.ToolStrip();
+            this.tsbHome = new System.Windows.Forms.ToolStripButton();
+            this.tsbDefaultArrow = new System.Windows.Forms.ToolStripLabel();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.panel7 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
+            this.panel7 = new System.Windows.Forms.Panel();
             this.lblBucketUsage = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.panel9 = new System.Windows.Forms.Panel();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.panel10 = new System.Windows.Forms.Panel();
+            this.panel11 = new System.Windows.Forms.Panel();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsbBack = new System.Windows.Forms.ToolStripButton();
+            this.tsbForward = new System.Windows.Forms.ToolStripButton();
             this.defaultContextMenu.SuspendLayout();
             this.toolStripTop.SuspendLayout();
             this.fileContextMenu.SuspendLayout();
             this.dirContextMenu.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel4.SuspendLayout();
-            this.panel5.SuspendLayout();
-            this.tsUrlBar.SuspendLayout();
-            this.panel6.SuspendLayout();
             this.toolStrip2.SuspendLayout();
+            this.tsUrlBar.SuspendLayout();
             this.panel3.SuspendLayout();
-            this.panel2.SuspendLayout();
-            this.panel7.SuspendLayout();
             this.panel8.SuspendLayout();
+            this.panel7.SuspendLayout();
+            this.panel2.SuspendLayout();
+            this.panel6.SuspendLayout();
+            this.panel9.SuspendLayout();
+            this.panel5.SuspendLayout();
+            this.panel10.SuspendLayout();
+            this.panel11.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvList
@@ -100,7 +110,7 @@
             this.lvList.Location = new System.Drawing.Point(0, 0);
             this.lvList.MultiSelect = false;
             this.lvList.Name = "lvList";
-            this.lvList.Size = new System.Drawing.Size(586, 401);
+            this.lvList.Size = new System.Drawing.Size(753, 466);
             this.lvList.SmallImageList = this.imgList;
             this.lvList.TabIndex = 0;
             this.lvList.UseCompatibleStateImageBehavior = false;
@@ -206,6 +216,7 @@
             // 
             // tsbDownload
             // 
+            this.tsbDownload.Enabled = false;
             this.tsbDownload.Image = ((System.Drawing.Image)(resources.GetObject("tsbDownload.Image")));
             this.tsbDownload.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbDownload.Name = "tsbDownload";
@@ -224,6 +235,7 @@
             // 
             // tsbDelete
             // 
+            this.tsbDelete.Enabled = false;
             this.tsbDelete.Image = ((System.Drawing.Image)(resources.GetObject("tsbDelete.Image")));
             this.tsbDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbDelete.Name = "tsbDelete";
@@ -254,6 +266,7 @@
             this.fileMenuItem_Rename.Name = "fileMenuItem_Rename";
             this.fileMenuItem_Rename.Size = new System.Drawing.Size(112, 22);
             this.fileMenuItem_Rename.Text = "重命名";
+            this.fileMenuItem_Rename.Visible = false;
             this.fileMenuItem_Rename.Click += new System.EventHandler(this.MenuItem_Rename_Click);
             // 
             // fileMenuItem_Delete
@@ -296,6 +309,7 @@
             this.dirMenuItem_Rename.Name = "dirMenuItem_Rename";
             this.dirMenuItem_Rename.Size = new System.Drawing.Size(112, 22);
             this.dirMenuItem_Rename.Text = "重命名";
+            this.dirMenuItem_Rename.Visible = false;
             this.dirMenuItem_Rename.Click += new System.EventHandler(this.MenuItem_Rename_Click);
             // 
             // dirMenuItem_Delete
@@ -313,66 +327,17 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(586, 60);
+            this.panel1.Size = new System.Drawing.Size(753, 60);
             this.panel1.TabIndex = 4;
             // 
             // panel4
             // 
-            this.panel4.Controls.Add(this.panel5);
             this.panel4.Controls.Add(this.panel6);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel4.Location = new System.Drawing.Point(0, 30);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(586, 30);
+            this.panel4.Size = new System.Drawing.Size(753, 30);
             this.panel4.TabIndex = 5;
-            // 
-            // panel5
-            // 
-            this.panel5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel5.Controls.Add(this.tsUrlBar);
-            this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel5.Location = new System.Drawing.Point(0, 0);
-            this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(400, 30);
-            this.panel5.TabIndex = 5;
-            // 
-            // tsUrlBar
-            // 
-            this.tsUrlBar.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tsUrlBar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.tsUrlBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsbHome,
-            this.tsbDefaultArrow});
-            this.tsUrlBar.Location = new System.Drawing.Point(0, 0);
-            this.tsUrlBar.Name = "tsUrlBar";
-            this.tsUrlBar.Padding = new System.Windows.Forms.Padding(10, 0, 1, 0);
-            this.tsUrlBar.Size = new System.Drawing.Size(398, 28);
-            this.tsUrlBar.TabIndex = 4;
-            this.tsUrlBar.Text = "toolStrip1";
-            // 
-            // tsbHome
-            // 
-            this.tsbHome.Image = ((System.Drawing.Image)(resources.GetObject("tsbHome.Image")));
-            this.tsbHome.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbHome.Name = "tsbHome";
-            this.tsbHome.Size = new System.Drawing.Size(52, 25);
-            this.tsbHome.Text = "主页";
-            this.tsbHome.Click += new System.EventHandler(this.btnHome_Click);
-            // 
-            // tsbDefaultArrow
-            // 
-            this.tsbDefaultArrow.Image = ((System.Drawing.Image)(resources.GetObject("tsbDefaultArrow.Image")));
-            this.tsbDefaultArrow.Name = "tsbDefaultArrow";
-            this.tsbDefaultArrow.Size = new System.Drawing.Size(16, 25);
-            // 
-            // panel6
-            // 
-            this.panel6.Controls.Add(this.toolStrip2);
-            this.panel6.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel6.Location = new System.Drawing.Point(400, 0);
-            this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(186, 30);
-            this.panel6.TabIndex = 6;
             // 
             // toolStrip2
             // 
@@ -383,7 +348,7 @@
             this.tsbSearch});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(186, 30);
+            this.toolStrip2.Size = new System.Drawing.Size(214, 30);
             this.toolStrip2.TabIndex = 0;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -402,6 +367,35 @@
             this.tsbSearch.Name = "tsbSearch";
             this.tsbSearch.Size = new System.Drawing.Size(150, 30);
             // 
+            // tsUrlBar
+            // 
+            this.tsUrlBar.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tsUrlBar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.tsUrlBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsbHome,
+            this.tsbDefaultArrow});
+            this.tsUrlBar.Location = new System.Drawing.Point(0, 0);
+            this.tsUrlBar.Name = "tsUrlBar";
+            this.tsUrlBar.Padding = new System.Windows.Forms.Padding(10, 0, 1, 0);
+            this.tsUrlBar.Size = new System.Drawing.Size(472, 30);
+            this.tsUrlBar.TabIndex = 4;
+            this.tsUrlBar.Text = "toolStrip1";
+            // 
+            // tsbHome
+            // 
+            this.tsbHome.Image = ((System.Drawing.Image)(resources.GetObject("tsbHome.Image")));
+            this.tsbHome.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbHome.Name = "tsbHome";
+            this.tsbHome.Size = new System.Drawing.Size(52, 27);
+            this.tsbHome.Text = "主页";
+            this.tsbHome.Click += new System.EventHandler(this.btnHome_Click);
+            // 
+            // tsbDefaultArrow
+            // 
+            this.tsbDefaultArrow.Image = ((System.Drawing.Image)(resources.GetObject("tsbDefaultArrow.Image")));
+            this.tsbDefaultArrow.Name = "tsbDefaultArrow";
+            this.tsbDefaultArrow.Size = new System.Drawing.Size(16, 27);
+            // 
             // panel3
             // 
             this.panel3.Controls.Add(this.panel8);
@@ -409,28 +403,8 @@
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(586, 30);
+            this.panel3.Size = new System.Drawing.Size(753, 30);
             this.panel3.TabIndex = 4;
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.chkAll);
-            this.panel2.Controls.Add(this.lvList);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 60);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(586, 401);
-            this.panel2.TabIndex = 5;
-            // 
-            // panel7
-            // 
-            this.panel7.Controls.Add(this.lblBucketUsage);
-            this.panel7.Controls.Add(this.label1);
-            this.panel7.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel7.Location = new System.Drawing.Point(406, 0);
-            this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(180, 30);
-            this.panel7.TabIndex = 2;
             // 
             // panel8
             // 
@@ -438,8 +412,26 @@
             this.panel8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel8.Location = new System.Drawing.Point(0, 0);
             this.panel8.Name = "panel8";
-            this.panel8.Size = new System.Drawing.Size(406, 30);
+            this.panel8.Size = new System.Drawing.Size(573, 30);
             this.panel8.TabIndex = 3;
+            // 
+            // panel7
+            // 
+            this.panel7.Controls.Add(this.lblBucketUsage);
+            this.panel7.Controls.Add(this.label1);
+            this.panel7.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel7.Location = new System.Drawing.Point(573, 0);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(180, 30);
+            this.panel7.TabIndex = 2;
+            // 
+            // lblBucketUsage
+            // 
+            this.lblBucketUsage.AutoSize = true;
+            this.lblBucketUsage.Location = new System.Drawing.Point(77, 9);
+            this.lblBucketUsage.Name = "lblBucketUsage";
+            this.lblBucketUsage.Size = new System.Drawing.Size(0, 12);
+            this.lblBucketUsage.TabIndex = 1;
             // 
             // label1
             // 
@@ -450,19 +442,104 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "已用空间：";
             // 
-            // lblBucketUsage
+            // panel2
             // 
-            this.lblBucketUsage.AutoSize = true;
-            this.lblBucketUsage.Location = new System.Drawing.Point(77, 9);
-            this.lblBucketUsage.Name = "lblBucketUsage";
-            this.lblBucketUsage.Size = new System.Drawing.Size(0, 12);
-            this.lblBucketUsage.TabIndex = 1;
+            this.panel2.Controls.Add(this.chkAll);
+            this.panel2.Controls.Add(this.lvList);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(0, 60);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(753, 466);
+            this.panel2.TabIndex = 5;
+            // 
+            // panel6
+            // 
+            this.panel6.Controls.Add(this.panel10);
+            this.panel6.Controls.Add(this.panel5);
+            this.panel6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel6.Location = new System.Drawing.Point(0, 0);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(753, 30);
+            this.panel6.TabIndex = 1;
+            // 
+            // panel9
+            // 
+            this.panel9.Controls.Add(this.toolStrip2);
+            this.panel9.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel9.Location = new System.Drawing.Point(472, 0);
+            this.panel9.Name = "panel9";
+            this.panel9.Size = new System.Drawing.Size(214, 30);
+            this.panel9.TabIndex = 0;
+            // 
+            // panel5
+            // 
+            this.panel5.Controls.Add(this.toolStrip1);
+            this.panel5.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panel5.Location = new System.Drawing.Point(0, 0);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(67, 30);
+            this.panel5.TabIndex = 0;
+            // 
+            // panel10
+            // 
+            this.panel10.Controls.Add(this.panel11);
+            this.panel10.Controls.Add(this.panel9);
+            this.panel10.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel10.Location = new System.Drawing.Point(67, 0);
+            this.panel10.Name = "panel10";
+            this.panel10.Size = new System.Drawing.Size(686, 30);
+            this.panel10.TabIndex = 1;
+            // 
+            // panel11
+            // 
+            this.panel11.Controls.Add(this.tsUrlBar);
+            this.panel11.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel11.Location = new System.Drawing.Point(0, 0);
+            this.panel11.Name = "panel11";
+            this.panel11.Size = new System.Drawing.Size(472, 30);
+            this.panel11.TabIndex = 1;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsbBack,
+            this.tsbForward});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(10, 0, 1, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(67, 30);
+            this.toolStrip1.TabIndex = 0;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsbBack
+            // 
+            this.tsbBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbBack.Enabled = false;
+            this.tsbBack.Image = ((System.Drawing.Image)(resources.GetObject("tsbBack.Image")));
+            this.tsbBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbBack.Name = "tsbBack";
+            this.tsbBack.Size = new System.Drawing.Size(23, 27);
+            this.tsbBack.Text = "后退";
+            this.tsbBack.Click += new System.EventHandler(this.tsbBack_Click);
+            // 
+            // tsbForward
+            // 
+            this.tsbForward.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbForward.Enabled = false;
+            this.tsbForward.Image = ((System.Drawing.Image)(resources.GetObject("tsbForward.Image")));
+            this.tsbForward.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbForward.Name = "tsbForward";
+            this.tsbForward.Size = new System.Drawing.Size(23, 27);
+            this.tsbForward.Text = "前进";
+            this.tsbForward.Click += new System.EventHandler(this.tsbForward_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(586, 461);
+            this.ClientSize = new System.Drawing.Size(753, 526);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "MainForm";
@@ -477,21 +554,27 @@
             this.dirContextMenu.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
-            this.panel5.ResumeLayout(false);
-            this.panel5.PerformLayout();
-            this.tsUrlBar.ResumeLayout(false);
-            this.tsUrlBar.PerformLayout();
-            this.panel6.ResumeLayout(false);
-            this.panel6.PerformLayout();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
+            this.tsUrlBar.ResumeLayout(false);
+            this.tsUrlBar.PerformLayout();
             this.panel3.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
-            this.panel7.ResumeLayout(false);
-            this.panel7.PerformLayout();
             this.panel8.ResumeLayout(false);
             this.panel8.PerformLayout();
+            this.panel7.ResumeLayout(false);
+            this.panel7.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.panel6.ResumeLayout(false);
+            this.panel9.ResumeLayout(false);
+            this.panel9.PerformLayout();
+            this.panel5.ResumeLayout(false);
+            this.panel5.PerformLayout();
+            this.panel10.ResumeLayout(false);
+            this.panel11.ResumeLayout(false);
+            this.panel11.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -529,8 +612,6 @@
         private System.Windows.Forms.ToolStrip tsUrlBar;
         private System.Windows.Forms.ToolStripButton tsbHome;
         private System.Windows.Forms.ToolStripLabel tsbDefaultArrow;
-        private System.Windows.Forms.Panel panel5;
-        private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripTextBox tsbSearch;
@@ -538,5 +619,13 @@
         private System.Windows.Forms.Panel panel7;
         private System.Windows.Forms.Label lblBucketUsage;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Panel panel10;
+        private System.Windows.Forms.Panel panel11;
+        private System.Windows.Forms.Panel panel9;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton tsbBack;
+        private System.Windows.Forms.ToolStripButton tsbForward;
     }
 }

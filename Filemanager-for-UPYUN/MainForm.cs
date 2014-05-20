@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 
 namespace Filemanager_for_UPYUN
@@ -19,6 +18,9 @@ namespace Filemanager_for_UPYUN
         private string curPath = "";//当前路径
         private string downPath = "D:";//下载路径
         private DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);//用于计算最后修改时间
+        Stack<string> urlForwardStack = new Stack<string>();//前进栈
+        Stack<string> urlBackStack = new Stack<string>();//后退栈
+
         #endregion
 
         #region Constructor
@@ -59,10 +61,10 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
-        /// 列举当前目录下的内容
+        /// 显示文件列表
         /// </summary>
         /// <param name="path"></param>
-        private void ListFileInfo(string path)
+        private void ShowFileList(string path)
         {
             lvList.Items.Clear();
             SetUrlBar(path);
@@ -73,62 +75,58 @@ namespace Filemanager_for_UPYUN
             {
                 //按类型和扩展名排序
                 var tempList = itemList.OrderBy(p => p.filetype).ThenBy(p => Path.GetExtension(p.filename));
-                foreach (var item in tempList)
+                foreach (FolderItem item in tempList)
                 {
-                    //转换为实际的北京时间
-                    string modiDate = new DateTime(TimeSpan.FromSeconds(item.number).Add(new TimeSpan(Jan1st1970.Ticks)).Ticks).AddHours(8).ToString("yyyy-MM-dd HH:mm");
-                    string fileType = item.filetype;
-                    string fileName = item.filename;
-                    if (path == String.Empty && fileName == "fm.db")//不显示DB配置文件
-                    {
-                        continue;
-                    }
-                    int fileSize = item.size;
-                    ListViewItem lvItem = new ListViewItem(new string[] { 
+                    BindToListView(item);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 绑定到ListView
+        /// </summary>
+        /// <param name="item"></param>
+        private void BindToListView(FolderItem item)
+        {
+            //转换为实际的北京时间
+            string modiDate = new DateTime(TimeSpan.FromSeconds(item.number).Add(new TimeSpan(Jan1st1970.Ticks)).Ticks).AddHours(8).ToString("yyyy-MM-dd HH:mm");
+            string fileType = item.filetype;
+            string fileName = item.filename;
+            int fileSize = item.size;
+            ListViewItem lvItem = new ListViewItem(new string[] { 
                         fileName,
                         fileType == FileType.Dir ? "-" : GetSizeWithUnit(fileSize),
                         modiDate
                     });
-                    lvItem.Tag = fileType;//用第一列的Tag来保存文件类型，便于切换右键菜单
-                    lvItem.SubItems[1].Tag = fileSize;//用第二列的Tag保存文件大小，便于排序用
-                    lvList.Items.Add(lvItem);
-                    //获取默认打开图片
-                    string ext = "";
-                    if (fileType == FileType.File)
-                    {
-                        ext = Path.GetExtension(item.filename);
-                    }
-                    else if (fileType == FileType.Dir)
-                    {
-                        ext = "DIR";
-                    }
-                    //绑定到ImageList中
-                    if (!imgList.Images.ContainsKey(ext))
-                    {
-                        if (fileType == FileType.File)
-                        {
-                            Icon icon = IconUtils.GetIconForFileExtension(ext, false, false);
-                            imgList.Images.Add(ext, icon);
-                        }
-                        else if (fileType == FileType.Dir)
-                        {
-                            Icon icon = IconUtils.GetIconForFolder(false, false);
-                            imgList.Images.Add(ext, icon);
-                        }
-                    }
-
-                    lvItem.ImageKey = ext;
-                    string serverPath = string.Concat(path, dirSeparator, fileName);
-                    FileDto fileDto = new FileDto()
-                    {
-                        ServerPath = serverPath,
-                        ServerName = fileName,
-                        LocalPath = serverPath,
-                        LocalName = fileName
-                    };
-                    DbUtil.Save(fileDto);
+            lvItem.Tag = fileType;//用第一列的Tag来保存文件类型，便于切换右键菜单
+            lvItem.SubItems[1].Tag = fileSize;//用第二列的Tag保存文件大小，便于排序用
+            lvList.Items.Add(lvItem);
+            //获取默认打开图片
+            string ext = "";
+            if (fileType == FileType.File)
+            {
+                ext = Path.GetExtension(item.filename);
+            }
+            else if (fileType == FileType.Dir)
+            {
+                ext = "DIR";
+            }
+            //绑定到ImageList中
+            if (!imgList.Images.ContainsKey(ext))
+            {
+                if (fileType == FileType.File)
+                {
+                    Icon icon = IconUtils.GetIconForFileExtension(ext, false, false);
+                    imgList.Images.Add(ext, icon);
+                }
+                else if (fileType == FileType.Dir)
+                {
+                    Icon icon = IconUtils.GetIconForFolder(false, false);
+                    imgList.Images.Add(ext, icon);
                 }
             }
+
+            lvItem.ImageKey = ext;
         }
 
         //设置当前显示路径
@@ -160,6 +158,7 @@ namespace Filemanager_for_UPYUN
                     itemFileName.Tag = filePath;
                     itemFileName.Click += delegate(object sender, EventArgs e)
                     {
+                        PushToBackStack(this.curPath);
                         this.curPath = itemFileName.Tag.ToString();
                         RefreshList();
                     };
@@ -259,7 +258,8 @@ namespace Filemanager_for_UPYUN
         /// </summary>
         private void RefreshList()
         {
-            ListFileInfo(this.curPath);
+            string url = this.curPath;
+            ShowFileList(url);
         }
 
         /// <summary>
@@ -270,8 +270,41 @@ namespace Filemanager_for_UPYUN
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
                 ListViewItem item = lvList.SelectedItems[0];
+                PushToBackStack(this.curPath);
                 this.curPath = String.Concat(this.curPath, dirSeparator, item.Text);
                 RefreshList();
+            }
+        }
+
+        /// <summary>
+        /// 添加到后退栈
+        /// </summary>
+        /// <param name="url"></param>
+        private void PushToBackStack(string url)
+        {
+            if (urlBackStack.Count == 0 || urlBackStack.Peek() != url)
+            {
+                urlBackStack.Push(url);
+                if (tsbBack.Enabled == false)
+                {
+                    tsbBack.Enabled = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 添加到前进栈
+        /// </summary>
+        /// <param name="url"></param>
+        private void PushToForwardStack(string url)
+        {
+            if (urlForwardStack.Count == 0 || urlForwardStack.Peek() != url)
+            {
+                urlForwardStack.Push(url);
+                if (tsbForward.Enabled == false)
+                {
+                    tsbForward.Enabled = true;
+                }
             }
         }
 
@@ -298,7 +331,19 @@ namespace Filemanager_for_UPYUN
 
                     if (fileName != textBox.Text)
                     {
-                        fileName = textBox.Text;
+                        fileName = textBox.Text.Trim();
+                    }
+                    if (!CheckPathValid(fileName))
+                    {
+                        MessageBox.Show("文件名称不合法,请重新输入！");
+                        textBox.Focus();
+                        return;
+                    }
+                    if (CheckFileNameExist(fileName, item))
+                    {
+                        MessageBox.Show("该文件名已存在,请输入其他可用名称!");
+                        textBox.Focus();
+                        return;
                     }
                     lvList.Controls.Remove(textBox);
                     if (isNewDir)
@@ -316,6 +361,45 @@ namespace Filemanager_for_UPYUN
                 textBox.Focus();
                 textBox.Select(0, fileName.Length - Path.GetExtension(fileName).Length);
             }
+        }
+
+        /// <summary>
+        /// 验证目录名是否有效,true:有效，flase:无效
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        private bool CheckPathValid(string fileName)
+        {
+            char[] cs = Path.GetInvalidPathChars();
+            foreach (char c in cs)
+            {
+                if (fileName.IndexOf(c) > -1)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 验证当前目录下是否已存在同名文件夹,
+        /// 返回true:存在,false:不存在
+        /// </summary>
+        /// <param name="fileName">新文件名</param>
+        /// <param name="curItem">当前正在编辑的项</param>
+        /// <returns></returns>
+        private bool CheckFileNameExist(string fileName, ListViewItem curItem)
+        {
+            if (lvList.Items != null && lvList.Items.Count > 0)
+            {
+                foreach (ListViewItem item in lvList.Items)
+                {
+                    if (curItem == item) continue;
+                    if (item.Text == fileName)
+                        return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -380,8 +464,6 @@ namespace Filemanager_for_UPYUN
             }
         }
 
-
-
         /// <summary>
         /// 递归删除目录
         /// </summary>
@@ -427,6 +509,7 @@ namespace Filemanager_for_UPYUN
                 DownloadItem(path, localPath, fileType);
             }
         }
+
         /// <summary>
         /// 下载文件或目录
         /// </summary>
@@ -445,6 +528,7 @@ namespace Filemanager_for_UPYUN
                 DownloadDir(path, localPath);
             }
         }
+
         /// <summary>
         /// 目录递归下载
         /// </summary>
@@ -486,6 +570,18 @@ namespace Filemanager_for_UPYUN
                 }
             }
         }
+
+        /// <summary>
+        /// 清除排序
+        /// </summary>
+        private void ClearSort()
+        {
+            foreach (ColumnHeader header in lvList.Columns)
+            {
+                header.Text = header.Text.TrimEnd(sortAsc).TrimEnd(sortDesc).TrimEnd();
+            }
+        }
+
         #endregion
 
         #region Form Events
@@ -497,20 +593,6 @@ namespace Filemanager_for_UPYUN
 
         private void MainForm_Load(object sender, System.EventArgs e)
         {
-            string localFileName = DbUtil.DbFileName;
-            string dbFile = String.Concat(this.curPath, dirSeparator, localFileName);
-            try
-            {
-                DownloadItem(dbFile, localFileName, FileType.File);
-            }
-            catch (WebException ex)
-            {
-                HttpWebResponse res = (HttpWebResponse)ex.Response;
-                if ((int)res.StatusCode == 404)
-                {
-                    DbUtil.CreateDB();
-                }
-            }
             RefreshList();
             lvList.ListViewItemSorter = new ListViewColumnSorter();
         }
@@ -539,7 +621,8 @@ namespace Filemanager_for_UPYUN
         //重命名
         private void MenuItem_Rename_Click(object sender, EventArgs e)
         {
-            RenameItem(false);
+            //未提供接口，暂不考虑
+            //RenameItem(false);
         }
 
         //删除
@@ -567,6 +650,7 @@ namespace Filemanager_for_UPYUN
         //显示主页按钮
         private void btnHome_Click(object sender, EventArgs e)
         {
+            PushToBackStack(this.curPath);
             this.curPath = "";
             RefreshList();
         }
@@ -595,6 +679,32 @@ namespace Filemanager_for_UPYUN
             NewDir();
         }
 
+        //前进
+        private void tsbForward_Click(object sender, EventArgs e)
+        {
+            PushToBackStack(this.curPath);
+            string url = urlForwardStack.Pop();
+            if (urlForwardStack.Count == 0)
+            {
+                tsbForward.Enabled = false;
+            }
+            this.curPath = url;
+            ShowFileList(url);
+        }
+
+        //后退
+        private void tsbBack_Click(object sender, EventArgs e)
+        {
+            PushToForwardStack(this.curPath);
+            string url = urlBackStack.Pop();
+            if (urlBackStack.Count == 0)
+            {
+                tsbBack.Enabled = false;
+            }
+            this.curPath = url;
+            ShowFileList(url);
+        }
+
         #endregion
 
         #region ListView Events
@@ -604,13 +714,12 @@ namespace Filemanager_for_UPYUN
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
                 ListViewItem item = lvList.SelectedItems[0];
-                if (item.Tag.ToString() == "F")
+                if (item.Tag.ToString() == FileType.Dir)
                 {
                     OpenDir();
                 }
             }
         }
-
 
         //选中项改变时，切换右键菜单
         private void lvList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -673,13 +782,6 @@ namespace Filemanager_for_UPYUN
         /// <summary>
         /// 清除排序标记
         /// </summary>
-        private void ClearSort()
-        {
-            foreach (ColumnHeader header in lvList.Columns)
-            {
-                header.Text = header.Text.TrimEnd(sortAsc).TrimEnd(sortDesc).TrimEnd();
-            }
-        }
 
         //全选(反选)
         private void chkAll_CheckedChanged(object sender, EventArgs e)
@@ -704,6 +806,9 @@ namespace Filemanager_for_UPYUN
             {
                 chkAll.Checked = true;
             }
+            bool hasCheckedItem = (lvList.CheckedItems.Count > 0);
+            tsbDownload.Enabled = hasCheckedItem;
+            tsbDelete.Enabled = hasCheckedItem;
         }
         //取消双击时勾选的默认效果
         private void lvList_MouseDown(object sender, MouseEventArgs e)
@@ -727,6 +832,7 @@ namespace Filemanager_for_UPYUN
         }
 
         #endregion
+
 
     }
 }
