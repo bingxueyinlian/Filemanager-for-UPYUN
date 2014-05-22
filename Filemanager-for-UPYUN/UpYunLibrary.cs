@@ -14,16 +14,34 @@ namespace Filemanager_for_UPYUN
     //目录条目类
     public class FolderItem
     {
-        public string filename;
-        public string filetype;
-        public int size;
-        public int number;
-        public FolderItem(string filename, string filetype, int size, int number)
+        /// <summary>
+        /// 文件名
+        /// </summary>
+        public string FileName { get; set; }
+        /// <summary>
+        /// 文件类型:F目录，N文件
+        /// </summary>
+        public string FileType { get; set; }
+        /// <summary>
+        /// 所在目录
+        /// </summary>
+        public string Url { get; set; }
+        /// <summary>
+        /// 文件大小
+        /// </summary>
+        public int Size { get; set; }
+        /// <summary>
+        /// 最后修改时间
+        /// </summary>
+        public int Number { get; set; }
+
+        public FolderItem(string filename, string filetype, int size, int number, string url)
         {
-            this.filename = filename;
-            this.filetype = filetype;
-            this.size = size;
-            this.number = number;
+            this.FileName = filename;
+            this.FileType = filetype;
+            this.Size = size;
+            this.Number = number;
+            this.Url = url;
         }
     }
 
@@ -289,7 +307,7 @@ namespace Filemanager_for_UPYUN
             List<FolderItem> AL = new List<FolderItem>();//modified
             while (i < ss.Length)
             {
-                FolderItem fi = new FolderItem(ss[i], ss[i + 1], int.Parse(ss[i + 2]), int.Parse(ss[i + 3]));
+                FolderItem fi = new FolderItem(ss[i], ss[i + 1], int.Parse(ss[i + 2]), int.Parse(ss[i + 3]), url);
                 AL.Add(fi);
                 i += 4;
             }

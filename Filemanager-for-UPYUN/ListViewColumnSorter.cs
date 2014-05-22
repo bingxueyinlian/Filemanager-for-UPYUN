@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Windows.Forms;
 
 namespace Filemanager_for_UPYUN
@@ -45,7 +44,7 @@ namespace Filemanager_for_UPYUN
         /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
         public int Compare(object x, object y)
         {
-            int compareResult;
+            int compareResult = 0;
             ListViewItem listviewX, listviewY;
 
             // Cast the objects to be compared to ListViewItem objects
@@ -53,9 +52,15 @@ namespace Filemanager_for_UPYUN
             listviewY = (ListViewItem)y;
             if (ColumnToSort == 1) //added
             {
-                int sizeX = Convert.ToInt32(listviewX.SubItems[ColumnToSort].Tag);
-                int sizeY = Convert.ToInt32(listviewY.SubItems[ColumnToSort].Tag);
-                compareResult = ObjectCompare.Compare(sizeX, sizeY);
+                FolderItem fItemX = listviewX.Tag as FolderItem;
+                FolderItem fItemY = listviewY.Tag as FolderItem;
+                if (fItemX != null && fItemY != null)
+                {
+                    int sizeX = fItemX.Size;
+                    int sizeY = fItemY.Size;
+                    compareResult = ObjectCompare.Compare(sizeX, sizeY);
+                }
+
             }
             else
             {

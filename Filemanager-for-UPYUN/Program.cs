@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Filemanager_for_UPYUN
@@ -15,7 +13,12 @@ namespace Filemanager_for_UPYUN
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LoginForm());
+            LoginForm loginForm = new LoginForm();//登陆窗口
+            if (loginForm.ShowDialog() == DialogResult.OK)
+            {
+                //启动主窗口
+                Application.Run(new MainForm(loginForm.UpYun, loginForm.BucketUsage));
+            }
         }
     }
 }

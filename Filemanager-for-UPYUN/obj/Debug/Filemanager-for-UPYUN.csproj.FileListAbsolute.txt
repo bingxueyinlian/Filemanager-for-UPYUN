@@ -6,4 +6,3 @@ D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filema
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filemanager-for-UPYUN.exe
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filemanager-for-UPYUN.pdb
 D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\bin\Debug\Filemanager-for-UPYUN.pdb
-D:\baiduyundownload\Filemanager-for-UPYUN\Filemanager-for-UPYUN\obj\Debug\Filemanager-for-UPYUN.csprojResolveAssemblyReference.cache
