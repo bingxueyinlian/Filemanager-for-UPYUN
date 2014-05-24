@@ -31,9 +31,9 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.lvList = new System.Windows.Forms.ListView();
-            this.colFileName = new System.Windows.Forms.ColumnHeader();
-            this.colSize = new System.Windows.Forms.ColumnHeader();
-            this.colModiDate = new System.Windows.Forms.ColumnHeader();
+            this.colFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colModiDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.defaultContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.defaultMenuItem_Upload = new System.Windows.Forms.ToolStripMenuItem();
             this.defaultMenuItem_NewDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -74,6 +74,14 @@
             this.tslBucketUsageDesc = new System.Windows.Forms.ToolStripLabel();
             this.tslBucketUsage = new System.Windows.Forms.ToolStripLabel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.panLoading = new System.Windows.Forms.Panel();
+            this.lblLoading = new System.Windows.Forms.Label();
+            this.bgWorker = new System.ComponentModel.BackgroundWorker();
+            this.statusBar = new System.Windows.Forms.StatusStrip();
+            this.tsStatusProgressBar = new System.Windows.Forms.ToolStripProgressBar();
+            this.tsStatusMsg = new System.Windows.Forms.ToolStripStatusLabel();
+            this.pnlStatus = new System.Windows.Forms.Panel();
+            this.panel13 = new System.Windows.Forms.Panel();
             this.defaultContextMenu.SuspendLayout();
             this.tsOperationBar.SuspendLayout();
             this.itemContextMenu.SuspendLayout();
@@ -92,6 +100,10 @@
             this.panel7.SuspendLayout();
             this.tsBucketUsageBar.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.panLoading.SuspendLayout();
+            this.statusBar.SuspendLayout();
+            this.pnlStatus.SuspendLayout();
+            this.panel13.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvList
@@ -108,17 +120,17 @@
             this.lvList.Location = new System.Drawing.Point(0, 0);
             this.lvList.MultiSelect = false;
             this.lvList.Name = "lvList";
-            this.lvList.Size = new System.Drawing.Size(584, 352);
+            this.lvList.Size = new System.Drawing.Size(584, 330);
             this.lvList.SmallImageList = this.imgList;
             this.lvList.TabIndex = 0;
             this.lvList.UseCompatibleStateImageBehavior = false;
             this.lvList.View = System.Windows.Forms.View.Details;
-            this.lvList.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvList_ItemChecked);
-            this.lvList.DoubleClick += new System.EventHandler(this.lvList_DoubleClick);
             this.lvList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lvList_ColumnClick);
-            this.lvList.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lvList_MouseDown);
+            this.lvList.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvList_ItemChecked);
             this.lvList.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvList_ItemSelectionChanged);
+            this.lvList.DoubleClick += new System.EventHandler(this.lvList_DoubleClick);
             this.lvList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lvList_KeyDown);
+            this.lvList.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lvList_MouseDown);
             // 
             // colFileName
             // 
@@ -510,20 +522,94 @@
             // 
             // panel2
             // 
+            this.panel2.BackColor = System.Drawing.Color.Transparent;
+            this.panel2.Controls.Add(this.panLoading);
             this.panel2.Controls.Add(this.chkAll);
             this.panel2.Controls.Add(this.lvList);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 60);
+            this.panel2.Location = new System.Drawing.Point(0, 0);
+            this.panel2.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(584, 352);
+            this.panel2.Size = new System.Drawing.Size(584, 330);
             this.panel2.TabIndex = 5;
+            // 
+            // panLoading
+            // 
+            this.panLoading.Controls.Add(this.lblLoading);
+            this.panLoading.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panLoading.Location = new System.Drawing.Point(0, 0);
+            this.panLoading.Name = "panLoading";
+            this.panLoading.Size = new System.Drawing.Size(584, 330);
+            this.panLoading.TabIndex = 3;
+            this.panLoading.Resize += new System.EventHandler(this.panLoading_Resize);
+            // 
+            // lblLoading
+            // 
+            this.lblLoading.Font = new System.Drawing.Font("SimSun", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblLoading.Location = new System.Drawing.Point(152, 45);
+            this.lblLoading.Name = "lblLoading";
+            this.lblLoading.Padding = new System.Windows.Forms.Padding(0, 0, 0, 50);
+            this.lblLoading.Size = new System.Drawing.Size(280, 240);
+            this.lblLoading.TabIndex = 2;
+            this.lblLoading.Text = "处理中，请稍后……";
+            this.lblLoading.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            // 
+            // bgWorker
+            // 
+            this.bgWorker.WorkerReportsProgress = true;
+            this.bgWorker.WorkerSupportsCancellation = true;
+            this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_DoWork);
+            this.bgWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_ProgressChanged);
+            this.bgWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bgWorker_RunWorkerCompleted);
+            // 
+            // statusBar
+            // 
+            this.statusBar.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsStatusProgressBar,
+            this.tsStatusMsg});
+            this.statusBar.Location = new System.Drawing.Point(0, 0);
+            this.statusBar.Name = "statusBar";
+            this.statusBar.Size = new System.Drawing.Size(584, 22);
+            this.statusBar.TabIndex = 3;
+            // 
+            // tsStatusProgressBar
+            // 
+            this.tsStatusProgressBar.Name = "tsStatusProgressBar";
+            this.tsStatusProgressBar.Size = new System.Drawing.Size(150, 16);
+            // 
+            // tsStatusMsg
+            // 
+            this.tsStatusMsg.Name = "tsStatusMsg";
+            this.tsStatusMsg.Size = new System.Drawing.Size(56, 17);
+            this.tsStatusMsg.Text = "显示状态";
+            // 
+            // pnlStatus
+            // 
+            this.pnlStatus.Controls.Add(this.statusBar);
+            this.pnlStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlStatus.Location = new System.Drawing.Point(0, 330);
+            this.pnlStatus.Name = "pnlStatus";
+            this.pnlStatus.Size = new System.Drawing.Size(584, 22);
+            this.pnlStatus.TabIndex = 6;
+            this.pnlStatus.Visible = false;
+            // 
+            // panel13
+            // 
+            this.panel13.Controls.Add(this.panel2);
+            this.panel13.Controls.Add(this.pnlStatus);
+            this.panel13.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel13.Location = new System.Drawing.Point(0, 60);
+            this.panel13.Name = "panel13";
+            this.panel13.Size = new System.Drawing.Size(584, 352);
+            this.panel13.TabIndex = 6;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 412);
-            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.panel13);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(500, 200);
@@ -560,6 +646,12 @@
             this.tsBucketUsageBar.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            this.panLoading.ResumeLayout(false);
+            this.statusBar.ResumeLayout(false);
+            this.statusBar.PerformLayout();
+            this.pnlStatus.ResumeLayout(false);
+            this.pnlStatus.PerformLayout();
+            this.panel13.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -610,5 +702,13 @@
         private System.Windows.Forms.ToolStripLabel tslBucketUsage;
         private System.Windows.Forms.ToolStrip tsOperationBar;
         private System.Windows.Forms.ToolStripMenuItem itemMenuItem_OpenParentDir;
+        private System.ComponentModel.BackgroundWorker bgWorker;
+        private System.Windows.Forms.Label lblLoading;
+        private System.Windows.Forms.Panel panLoading;
+        private System.Windows.Forms.StatusStrip statusBar;
+        private System.Windows.Forms.ToolStripStatusLabel tsStatusMsg;
+        private System.Windows.Forms.ToolStripProgressBar tsStatusProgressBar;
+        private System.Windows.Forms.Panel pnlStatus;
+        private System.Windows.Forms.Panel panel13;
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Filemanager_for_UPYUN
@@ -17,7 +19,7 @@ namespace Filemanager_for_UPYUN
         readonly string dirSeparator = Path.DirectorySeparatorChar.ToString();//目录分隔符
         UpYun upYun;
         string curPath = "";//当前路径
-        string downPath = "D:";//下载路径
+        string downPath = "D:\\upyun";//下载路径
         DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);//用于计算最后修改时间
         Stack<string> urlForwardStack = new Stack<string>();//前进栈
         Stack<string> urlBackStack = new Stack<string>();//后退栈
@@ -87,8 +89,16 @@ namespace Filemanager_for_UPYUN
         /// <param name="path"></param>
         private void ShowFileList(string path)
         {
-            List<FolderItem> itemList = GetFiles(path);
-            BindToListView(itemList);
+            if (!bgWorker.IsBusy)
+            {
+                ThreadArgument arg = new ThreadArgument()
+                {
+                    WorkType = WorkType.Default,
+                    Data = path
+                };
+                panLoading.Visible = true;
+                bgWorker.RunWorkerAsync(arg);
+            }
         }
 
         /// <summary>
@@ -105,18 +115,11 @@ namespace Filemanager_for_UPYUN
         /// <summary>
         /// 获取指定目录下的所有文件和目录
         /// </summary>
-        /// <param name="path">目录名</param>
+        /// <param name="dirPath">目录名</param>
         /// <returns></returns>
-        private List<FolderItem> GetFiles(string path)
+        private List<FolderItem> GetDirFiles(string dirPath)
         {
-            try
-            {
-                return this.upYun.readDir(path);
-            }
-            catch
-            {
-                return null;
-            }
+            return this.upYun.readDir(dirPath);
         }
 
         /// <summary>
@@ -229,6 +232,17 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
+        /// 设置状态栏是否可见
+        /// </summary>
+        /// <param name="isVisible">是否可见</param>
+        private void SetStatusBarVisible(bool isVisible)
+        {
+            pnlStatus.Visible = isVisible;
+            tsStatusProgressBar.Value = 0;
+            tsStatusMsg.Text = String.Empty;
+        }
+
+        /// <summary>
         /// 获取文件大小(带单位)
         /// </summary>
         /// <param name="size"></param>
@@ -264,14 +278,31 @@ namespace Filemanager_for_UPYUN
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 string[] fileNames = dlg.FileNames;
-                foreach (string fileName in fileNames)
+                if (fileNames != null && fileNames.Length > 0)
                 {
-                    byte[] data = File.ReadAllBytes(fileName);
-                    this.upYun.setContentMD5(UpYun.md5_file(fileName));
-                    string path = String.Concat(this.curPath, dirSeparator, Path.GetFileName(fileName));
-                    this.upYun.writeFile(path, data, false);
+                    string largeList = String.Empty;
+                    foreach (string fileName in fileNames)
+                    {
+                        bool isTooLarge = CheckFileIsTooLarge(fileName);
+                        if (isTooLarge)
+                        {
+                            largeList += fileName + "\r\n";
+                        }
+                    }
+                    if (largeList != String.Empty)
+                    {
+                        MessageUtil.Warning("无法上传以下超过100M的文件:\r\n" + largeList);
+                        return;
+                    }
+                    ThreadArgument arg = new ThreadArgument()
+                    {
+                        WorkType = WorkType.Upload,
+                        Data = fileNames
+                    };
+                    panLoading.Visible = true;
+                    SetStatusBarVisible(true);
+                    bgWorker.RunWorkerAsync(arg);
                 }
-                RefreshList(this.curPath);
             }
         }
 
@@ -282,7 +313,8 @@ namespace Filemanager_for_UPYUN
         /// <returns></returns>
         private bool CheckFileIsTooLarge(string fileName)
         {
-            return true;
+            FileInfo fi = new FileInfo(fileName);
+            return (fi.Length / Math.Pow(1024, 2)) > 100;
         }
 
         /// <summary>
@@ -310,14 +342,24 @@ namespace Filemanager_for_UPYUN
         /// <summary>
         /// 刷新列表
         /// </summary>
-        /// <param name="url"></param>
+        /// <param name="url">路径</param>
         private void RefreshList(string url)
         {
-            if (this.curPath != url)
+            RefreshList(url, true);
+        }
+
+        /// <summary>
+        /// 刷新列表，指定是否加入到后退栈
+        /// </summary>
+        /// <param name="url">路径</param>
+        /// <param name="pushToBack">否加入到后退栈</param>
+        private void RefreshList(string url, bool pushToBack)
+        {
+            if (pushToBack)
             {
                 PushToBackStack(this.curPath);
-                this.curPath = url;
             }
+            this.curPath = url;
             int start = url.IndexOf('"') + 1;
             if (start > 0)//包含双引号'"',表示搜索状态
             {
@@ -430,21 +472,13 @@ namespace Filemanager_for_UPYUN
                     lvList.Controls.Remove(textBox);
                     if (isNewDir)
                     {
-                        string path = String.Concat(this.curPath, dirSeparator, newFileName);
-                        bool res = this.upYun.mkDir(path, false);
-                        if (!res)
+                        ThreadArgument arg = new ThreadArgument()
                         {
-                            MessageUtil.Show("创建目录失败!");
-                        }
-                        else
-                        {
-                            FolderItem fItem = item.Tag as FolderItem;
-                            if (fItem != null)
-                            {
-                                fItem.FileName = newFileName;
-                            }
-                            //RefreshList(this.curPath);
-                        }
+                            WorkType = WorkType.NewDir,
+                            Data = item
+                        };
+                        panLoading.Visible = true;
+                        bgWorker.RunWorkerAsync(arg);
                     }
                 };
                 textBox.Text = fileName;
@@ -513,20 +547,25 @@ namespace Filemanager_for_UPYUN
         {
             if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
             {
-                if (MessageUtil.Confirm("您确认要删除吗？删除后将无法恢复!") == DialogResult.OK)
+                if (MessageUtil.Confirm("您确认要删除吗？删除后将无法恢复！") == DialogResult.OK)
                 {
                     ListViewItem item = lvList.SelectedItems[0];
                     FolderItem fItem = item.Tag as FolderItem;
                     if (fItem != null)
                     {
-                        DeleteItem(fItem);
-                        RefreshList(this.curPath);
+                        ThreadArgument arg = new ThreadArgument()
+                        {
+                            WorkType = WorkType.Delete,
+                            Data = new List<FolderItem>() { fItem }
+                        };
+                        panLoading.Visible = true;
+                        bgWorker.RunWorkerAsync(arg);
                     }
                 }
             }
             else
             {
-                MessageUtil.Show("请选择要删除的文件或目录");
+                MessageUtil.Warning("请选择要删除的文件或目录！");
             }
         }
 
@@ -539,20 +578,31 @@ namespace Filemanager_for_UPYUN
             {
                 if (MessageUtil.Confirm("您确认要删除吗？删除后将无法恢复!") == DialogResult.OK)
                 {
+                    List<FolderItem> deleteList = new List<FolderItem>();
                     foreach (ListViewItem item in lvList.CheckedItems)
                     {
                         FolderItem fItem = item.Tag as FolderItem;
                         if (fItem != null)
                         {
-                            DeleteItem(fItem);
+                            deleteList.Add(fItem);
                         }
                     }
-                    RefreshList(this.curPath);
+                    if (!bgWorker.IsBusy)
+                    {
+                        ThreadArgument arg = new ThreadArgument()
+                        {
+                            WorkType = WorkType.Delete,
+                            Data = deleteList
+                        };
+                        panLoading.Visible = true;
+                        SetStatusBarVisible(true);
+                        bgWorker.RunWorkerAsync(arg);
+                    }
                 }
             }
             else
             {
-                MessageUtil.Show("请勾选要删除的文件或目录");
+                MessageUtil.Warning("请勾选要删除的文件或目录");
             }
         }
 
@@ -669,15 +719,23 @@ namespace Filemanager_for_UPYUN
         {
             if (lvList.CheckedItems != null && lvList.CheckedItems.Count > 0)
             {
+                List<FolderItem> downLoadList = new List<FolderItem>();
                 foreach (ListViewItem item in lvList.CheckedItems)
                 {
                     FolderItem fItem = item.Tag as FolderItem;
                     if (fItem != null)
                     {
-                        string localpath = String.Concat(this.downPath, dirSeparator, fItem.FileName);
-                        DownloadItem(fItem, localpath);
+                        downLoadList.Add(fItem);
                     }
                 }
+                ThreadArgument arg = new ThreadArgument()
+                {
+                    WorkType = WorkType.Download,
+                    Data = downLoadList
+                };
+                panLoading.Visible = true;
+                SetStatusBarVisible(true);
+                bgWorker.RunWorkerAsync(arg);
             }
         }
 
@@ -700,7 +758,7 @@ namespace Filemanager_for_UPYUN
             string text = tsbSearchText.Text.Trim();
             if (text == String.Empty)
             {
-                MessageUtil.Show("请输入搜索内容!");
+                MessageUtil.Warning("请输入搜索内容！");
                 tsbSearchText.Text = String.Empty;
                 tsbSearchText.Focus();
                 return;
@@ -713,11 +771,16 @@ namespace Filemanager_for_UPYUN
         /// </summary>
         private void Search(string text)
         {
-            string path = "";
-            List<FolderItem> itemList = SearchText(text, path);
-            string tempText = String.Format("\"{0}\"的搜索结果", text);
-            this.curPath = String.Concat(path, dirSeparator, tempText);
-            BindToListView(itemList);
+            if (!bgWorker.IsBusy)
+            {
+                ThreadArgument arg = new ThreadArgument()
+                {
+                    WorkType = WorkType.Search,
+                    Data = text
+                };
+                panLoading.Visible = true;
+                bgWorker.RunWorkerAsync(arg);
+            }
         }
 
         /// <summary>
@@ -727,7 +790,7 @@ namespace Filemanager_for_UPYUN
         private List<FolderItem> SearchText(string text, string path)
         {
             List<FolderItem> resultList = new List<FolderItem>();
-            List<FolderItem> itemList = GetFiles(path);
+            List<FolderItem> itemList = GetDirFiles(path);
             if (itemList != null && itemList.Count > 0)
             {
                 foreach (FolderItem item in itemList)
@@ -776,10 +839,17 @@ namespace Filemanager_for_UPYUN
         private void MainForm_Load(object sender, System.EventArgs e)
         {
             InitInvalidChars();
-            RefreshList(this.curPath);
+            RefreshList(this.curPath, false);
             lvList.ListViewItemSorter = new ListViewColumnSorter();
+            this.lblLoading.Image = Filemanager_for_UPYUN.Properties.Resources.loading;
         }
 
+        private void panLoading_Resize(object sender, EventArgs e)
+        {
+            int x = (panLoading.Width - lblLoading.Width) / 2;
+            int y = (panLoading.Height - lblLoading.Height) / 2;
+            lblLoading.Location = new Point(x, y);
+        }
         #endregion
 
         #region Menu Events
@@ -882,8 +952,7 @@ namespace Filemanager_for_UPYUN
             {
                 tsbBack.Enabled = false;
             }
-            this.curPath = url;
-            RefreshList(url);
+            RefreshList(url, false);
         }
 
         //点击搜索
@@ -901,7 +970,7 @@ namespace Filemanager_for_UPYUN
             }
         }
 
-        //屏蔽非法字符
+        //屏蔽无效字符
         private void Text_KeyPress(object sender, KeyPressEventArgs e)
         {
             char ch = e.KeyChar;
@@ -1053,5 +1122,206 @@ namespace Filemanager_for_UPYUN
         }
 
         #endregion
+
+        #region Thread Backgroundworker Events
+
+        //线程工作区
+        private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            ThreadArgument arg = (ThreadArgument)e.Argument;
+            if (arg != null)
+            {
+                ThreadResult result = new ThreadResult();
+                result.ThreadArg = arg;
+                result.IsSuccess = true;
+                try
+                {
+                    switch (arg.WorkType)
+                    {
+                        case WorkType.Default:
+                            string path = arg.Data.ToString();
+                            result.DataList = GetDirFiles(path);
+                            break;
+                        case WorkType.Upload:
+                            string[] fileNames = arg.Data as string[];
+                            if (fileNames != null && fileNames.Length > 0)
+                            {
+                                int count = fileNames.Length;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    string fullName = fileNames[i];
+                                    byte[] data = File.ReadAllBytes(fullName);
+                                    this.upYun.setContentMD5(UpYun.md5_file(fullName));
+                                    string fName = Path.GetFileName(fullName);
+                                    string serverPath = String.Concat(this.curPath, dirSeparator, fName);
+
+                                    StateInfo sInfo = new StateInfo();
+                                    sInfo.WorkType = WorkType.Upload;
+                                    sInfo.FileName = fName;
+                                    int percent = 100 * (i + 1) / count;
+                                    bgWorker.ReportProgress(percent, sInfo);//前置通知
+
+                                    this.upYun.writeFile(serverPath, data, false);//上传
+
+                                    sInfo.IsComplete = true;
+                                    bgWorker.ReportProgress(percent, sInfo);//后置通知
+                                }
+                            }
+                            break;
+                        case WorkType.Download:
+                            List<FolderItem> downLoadList = arg.Data as List<FolderItem>;
+                            if (downLoadList != null && downLoadList.Count > 0)
+                            {
+                                int count = downLoadList.Count;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    FolderItem fItem = downLoadList[i];
+                                    string fileName = fItem.FileName;
+                                    string localpath = String.Concat(this.downPath, dirSeparator, fileName);
+
+                                    StateInfo sInfo = new StateInfo();
+                                    sInfo.WorkType = WorkType.Download;
+                                    sInfo.FileName = fileName;
+                                    int percent = 100 * (i + 1) / count;
+                                    bgWorker.ReportProgress(percent, sInfo);//前置通知
+
+                                    DownloadItem(fItem, localpath);//下载
+
+                                    sInfo.IsComplete = true;
+                                    bgWorker.ReportProgress(percent, sInfo);//后置通知
+                                }
+                            }
+                            break;
+                        case WorkType.NewDir:
+                            ListViewItem item = arg.Data as ListViewItem;
+                            if (item != null)
+                            {
+                                string newDirPath = String.Concat(this.curPath, dirSeparator, item.Text);
+                                result.IsSuccess = this.upYun.mkDir(newDirPath, false);
+                            }
+                            break;
+                        case WorkType.Delete:
+                            List<FolderItem> deleteList = arg.Data as List<FolderItem>;
+                            if (deleteList != null && deleteList.Count > 0)
+                            {
+                                int count = deleteList.Count;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    FolderItem fItem = deleteList[i];
+
+                                    StateInfo sInfo = new StateInfo();
+                                    sInfo.WorkType = WorkType.Delete;
+                                    sInfo.FileName = fItem.FileName;
+                                    int percent = 100 * (i + 1) / count;
+                                    bgWorker.ReportProgress(percent, sInfo);//前置通知
+
+                                    DeleteItem(fItem);//删除
+
+                                    sInfo.IsComplete = true;
+                                    bgWorker.ReportProgress(percent, sInfo);//后置通知
+                                }
+                            }
+                            break;
+                        case WorkType.Search:
+                            string searchText = arg.Data.ToString();
+                            result.DataList = SearchText(searchText, String.Empty);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                catch
+                {
+                    result.IsSuccess = false;
+                }
+                e.Result = result;
+            }
+        }
+
+        //线程工作进度通知
+        private void bgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            StateInfo info = e.UserState as StateInfo;
+            if (info != null)
+            {
+                WorkType workType = info.WorkType;
+                string infoType = String.Empty;
+                if (workType == WorkType.Upload)
+                {
+                    infoType = "上传";
+                }
+                else if (workType == WorkType.Download)
+                {
+                    infoType = "下载";
+                }
+                else if (workType == WorkType.Delete)
+                {
+                    infoType = "删除";
+                }
+                if (info.IsComplete)
+                {
+                    infoType += "完成";
+                }
+                else
+                {
+                    infoType = String.Concat("正在", infoType, "...");
+                }
+                tsStatusMsg.Text = String.Format("{0}：{1}", info.FileName, infoType);
+            }
+            tsStatusProgressBar.Value = e.ProgressPercentage;
+        }
+
+        //线程处理完成
+        private void bgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            panLoading.Visible = false;
+            ThreadResult result = e.Result as ThreadResult;
+            if (result != null)
+            {
+                #region  执行完后进行界面处理
+                ThreadArgument arg = result.ThreadArg;
+                if (arg != null)
+                {
+                    switch (arg.WorkType)
+                    {
+                        case WorkType.Default:
+                            BindToListView(result.DataList);
+                            break;
+                        case WorkType.Upload:
+                            RefreshList(this.curPath);
+                            break;
+                        case WorkType.Download:
+                            MessageUtil.Show("下载完成！");
+                            break;
+                        case WorkType.NewDir:
+                            ListViewItem item = arg.Data as ListViewItem;
+                            if (item != null)
+                            {
+                                FolderItem fItem = item.Tag as FolderItem;
+                                if (fItem != null)
+                                {
+                                    fItem.FileName = item.Text;
+                                }
+                            }
+                            break;
+                        case WorkType.Delete:
+                            RefreshList(this.curPath);
+                            break;
+                        case WorkType.Search:
+                            string tempText = String.Format("\"{0}\"的搜索结果", arg.Data.ToString());
+                            this.curPath = String.Concat(dirSeparator, tempText);
+                            BindToListView(result.DataList);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                #endregion
+            }
+            SetStatusBarVisible(false);
+        }
+
+        #endregion
+
     }
 }

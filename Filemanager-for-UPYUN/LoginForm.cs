@@ -82,7 +82,7 @@ namespace Filemanager_for_UPYUN
             }
             catch
             {
-                MessageUtil.Show("登陆失败,请检查用户信息后重试！");
+                MessageUtil.Warning("登陆失败,请检查用户信息后重试！");
             }
         }
 
@@ -91,19 +91,19 @@ namespace Filemanager_for_UPYUN
         {
             if (bucketname == String.Empty)
             {
-                MessageUtil.Show("请输入空间名！");
+                MessageUtil.Warning("请输入空间名！");
                 txtBucketName.Focus();
                 return false;
             }
             if (bucketname == String.Empty)
             {
-                MessageUtil.Show("请输入用户名！");
+                MessageUtil.Warning("请输入用户名！");
                 txtUserName.Focus();
                 return false;
             }
             if (password == String.Empty)
             {
-                MessageUtil.Show("请输入密码！");
+                MessageUtil.Warning("请输入密码！");
                 txtPassword.Focus();
                 return false;
             }
