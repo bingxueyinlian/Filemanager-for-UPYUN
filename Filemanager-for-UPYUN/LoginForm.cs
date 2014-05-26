@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Windows.Forms;
 
 namespace Filemanager_for_UPYUN
@@ -28,7 +29,7 @@ namespace Filemanager_for_UPYUN
             string userPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             savePath = String.Concat(userPath, Path.DirectorySeparatorChar, savePath);
             fileName = String.Concat(userPath, Path.DirectorySeparatorChar, fileName);
-            
+
             string userinfo = GetUserInto();
             if (!String.IsNullOrEmpty(userinfo))
             {
@@ -80,9 +81,19 @@ namespace Filemanager_for_UPYUN
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
-            catch
+            catch (WebException we)
             {
-                MessageUtil.Warning("登陆失败,请检查用户信息后重试！");
+                if (we.Status == WebExceptionStatus.ConnectFailure)
+                {
+                    MessageUtil.Warning("无法连接到服务器，请检查网络连接是否正常！");
+                    return;
+                }
+                HttpWebResponse res = we.Response as HttpWebResponse;
+                if (res != null && res.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    MessageUtil.Warning("登陆失败,请检查用户信息是否有误！");
+                    return;
+                }
             }
         }
 

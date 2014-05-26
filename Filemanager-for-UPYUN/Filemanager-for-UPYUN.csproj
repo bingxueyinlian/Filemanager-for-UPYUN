@@ -123,11 +123,13 @@
     <Content Include="Resources\Forward.jpg" />
     <Content Include="Resources\Home.png" />
     <None Include="Resources\loading.gif" />
+    <None Include="Resources\List.jpg" />
     <Content Include="Resources\logo.ico" />
     <Content Include="Resources\NewFolder.png" />
     <Content Include="Resources\OpenFolder.png" />
     <Content Include="Resources\Refresh.jpg" />
     <Content Include="Resources\Search.png" />
+    <None Include="Resources\Thumbnails.png" />
     <Content Include="Resources\Upload.png" />
     <Content Include="Resources\upyun.jpg" />
   </ItemGroup>

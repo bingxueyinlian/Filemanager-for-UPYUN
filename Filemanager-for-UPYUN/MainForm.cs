@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -44,6 +45,20 @@ namespace Filemanager_for_UPYUN
         #endregion
 
         #region Private Mothods
+
+        /// <summary>
+        /// 刷新空间使用情况
+        /// </summary>
+        private void RefreshBucketUsage()
+        {
+            try
+            {
+                int bucketUsage = this.upYun.getBucketUsage();
+                tslBucketUsage.Text = GetSizeWithUnit(bucketUsage); ;
+
+            }
+            catch { }
+        }
 
         /// <summary>
         /// 初使化无效字符集，保存在invalidChars中
@@ -109,6 +124,7 @@ namespace Filemanager_for_UPYUN
             lvList.Items.Clear();
             SetUrlBar();
             chkAll.Checked = false;
+            SetButtonEnabled(false);
             SetContextMenu(MenuType.Default);
         }
 
@@ -129,51 +145,58 @@ namespace Filemanager_for_UPYUN
         private void BindToListView(List<FolderItem> itemList)
         {
             ClearListViewBeforeShow();
-            if (itemList != null && itemList.Count > 0)
+            if (itemList == null || itemList.Count == 0)
             {
-                //按类型和扩展名排序
-                var tempList = itemList.OrderBy(p => p.FileType).ThenBy(p => Path.GetExtension(p.FileName));
-                foreach (FolderItem item in tempList)
-                {
-                    //转换为实际的北京时间
-                    string modiDate = new DateTime(TimeSpan.FromSeconds(item.Number).Add(new TimeSpan(Jan1st1970.Ticks)).Ticks).AddHours(8).ToString("yyyy-MM-dd HH:mm");
-                    string fileType = item.FileType;
-                    string fileName = item.FileName;
-                    int fileSize = item.Size;
-                    ListViewItem lvItem = new ListViewItem(new string[] { 
+                //MessageUtil.Show("没有找到相关文件！");
+                return;
+            }
+
+            //按类型和扩展名排序
+            var tempList = itemList.OrderBy(p => p.FileType).ThenBy(p => Path.GetExtension(p.FileName));
+            foreach (FolderItem item in tempList)
+            {
+                //转换为实际的北京时间
+                string modiDate = new DateTime(TimeSpan.FromSeconds(item.Number).Add(new TimeSpan(Jan1st1970.Ticks)).Ticks).AddHours(8).ToString("yyyy-MM-dd HH:mm");
+                string fileType = item.FileType;
+                string fileName = item.FileName;
+                int fileSize = item.Size;
+                ListViewItem lvItem = new ListViewItem(new string[] { 
                         fileName,
                         fileType == FileType.Dir ? "-" : GetSizeWithUnit(fileSize),
                         modiDate
                     });
-                    lvItem.Tag = item;//用Tag来保存item，以便后续使用
-                    lvList.Items.Add(lvItem);
-                    //获取默认打开图片
-                    string ext = "";
+                lvItem.Tag = item;//用Tag来保存item，以便后续使用
+                lvList.Items.Add(lvItem);
+                //获取默认打开图片
+                string ext = "";
+                if (fileType == FileType.File)
+                {
+                    ext = Path.GetExtension(item.FileName);
+                }
+                else if (fileType == FileType.Dir)
+                {
+                    ext = "DIR";
+                }
+                //绑定到ImageList中
+                if (!imgSmallList.Images.ContainsKey(ext))
+                {
                     if (fileType == FileType.File)
                     {
-                        ext = Path.GetExtension(item.FileName);
+                        Icon smallIcon = IconUtils.GetIconForFileExtension(ext, false, false);
+                        Icon largeIcon = IconUtils.GetIconForFileExtension(ext, true, false);
+                        imgSmallList.Images.Add(ext, smallIcon);
+                        imageLargeList.Images.Add(ext, largeIcon);
                     }
                     else if (fileType == FileType.Dir)
                     {
-                        ext = "DIR";
+                        Icon smallIcon = IconUtils.GetIconForFolder(false, false);
+                        Icon largeIcon = IconUtils.GetIconForFolder(true, false);
+                        imgSmallList.Images.Add(ext, smallIcon);
+                        imageLargeList.Images.Add(ext, largeIcon);
                     }
-                    //绑定到ImageList中
-                    if (!imgList.Images.ContainsKey(ext))
-                    {
-                        if (fileType == FileType.File)
-                        {
-                            Icon icon = IconUtils.GetIconForFileExtension(ext, false, false);
-                            imgList.Images.Add(ext, icon);
-                        }
-                        else if (fileType == FileType.Dir)
-                        {
-                            Icon icon = IconUtils.GetIconForFolder(false, false);
-                            imgList.Images.Add(ext, icon);
-                        }
-                    }
-
-                    lvItem.ImageKey = ext;
                 }
+
+                lvItem.ImageKey = ext;
             }
         }
 
@@ -329,9 +352,9 @@ namespace Filemanager_for_UPYUN
             item.Tag = new FolderItem("新建文件夹", FileType.Dir, 0, number, this.curPath);
 
             string ext = "DIR";
-            if (!imgList.Images.ContainsKey(ext))
+            if (!imgSmallList.Images.ContainsKey(ext))
             {
-                imgList.Images.Add(ext, IconUtils.GetIconForFolder(false, false));
+                imgSmallList.Images.Add(ext, IconUtils.GetIconForFolder(false, false));
             }
             item.ImageKey = ext;
             lvList.Items.Add(item);
@@ -449,7 +472,14 @@ namespace Filemanager_for_UPYUN
                 ListViewItem item = lvList.SelectedItems[0];
                 string fileName = item.Text;
                 TextBox textBox = new TextBox();
-                textBox.Location = new System.Drawing.Point(item.Bounds.Left + 35, item.Bounds.Top);
+                if (lvList.View == View.Details)
+                {
+                    textBox.Location = new Point(item.Bounds.Left + 35, item.Bounds.Top);
+                }
+                else
+                {
+                    textBox.Location = new Point(item.Bounds.Left + 10, item.Bounds.Bottom - textBox.Height);
+                }
                 textBox.KeyDown += delegate(object sender, KeyEventArgs e)
                 {
                     if (e.KeyCode == Keys.Enter)
@@ -541,45 +571,25 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
-        /// 删除当前选中的项
+        /// 删除选中项(多选)
         /// </summary>
-        private void DeleteSelectedItem()
+        private void DeleteSelectedItems()
         {
-            if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
+            System.Collections.IList selectedList = null;
+            if (lvList.View == View.Details)
             {
-                if (MessageUtil.Confirm("您确认要删除吗？删除后将无法恢复！") == DialogResult.OK)
-                {
-                    ListViewItem item = lvList.SelectedItems[0];
-                    FolderItem fItem = item.Tag as FolderItem;
-                    if (fItem != null)
-                    {
-                        ThreadArgument arg = new ThreadArgument()
-                        {
-                            WorkType = WorkType.Delete,
-                            Data = new List<FolderItem>() { fItem }
-                        };
-                        panLoading.Visible = true;
-                        bgWorker.RunWorkerAsync(arg);
-                    }
-                }
+                selectedList = lvList.CheckedItems;
             }
             else
             {
-                MessageUtil.Warning("请选择要删除的文件或目录！");
+                selectedList = lvList.SelectedItems;
             }
-        }
-
-        /// <summary>
-        /// 删除选中项(多选)
-        /// </summary>
-        private void DeleteCheckedItems()
-        {
-            if (lvList.CheckedItems != null && lvList.CheckedItems.Count > 0)
+            if (selectedList != null && selectedList.Count > 0)
             {
                 if (MessageUtil.Confirm("您确认要删除吗？删除后将无法恢复!") == DialogResult.OK)
                 {
                     List<FolderItem> deleteList = new List<FolderItem>();
-                    foreach (ListViewItem item in lvList.CheckedItems)
+                    foreach (ListViewItem item in selectedList)
                     {
                         FolderItem fItem = item.Tag as FolderItem;
                         if (fItem != null)
@@ -602,7 +612,7 @@ namespace Filemanager_for_UPYUN
             }
             else
             {
-                MessageUtil.Warning("请勾选要删除的文件或目录");
+                MessageUtil.Warning("请选择要删除的文件或目录");
             }
         }
 
@@ -653,23 +663,6 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
-        /// 下载当前选中项[右键]
-        /// </summary>
-        private void DownloadSelectedItem()
-        {
-            if (lvList.SelectedItems != null && lvList.SelectedItems.Count > 0)
-            {
-                ListViewItem item = lvList.SelectedItems[0];
-                FolderItem fItem = item.Tag as FolderItem;
-                if (fItem != null)
-                {
-                    string localPath = String.Concat(this.downPath, dirSeparator, fItem.FileName);
-                    DownloadItem(fItem, localPath);
-                }
-            }
-        }
-
-        /// <summary>
         /// 下载文件或目录
         /// </summary>
         /// <param name="path">服务器路径</param>
@@ -713,14 +706,23 @@ namespace Filemanager_for_UPYUN
         }
 
         /// <summary>
-        /// 下载选中项(多选)
+        /// 下载选择项(多选)
         /// </summary>
-        private void DownloadCheckedItems()
+        private void DownloadSelectedItems()
         {
-            if (lvList.CheckedItems != null && lvList.CheckedItems.Count > 0)
+            IList selectedList = null;
+            if (lvList.View == View.Details)
+            {
+                selectedList = lvList.CheckedItems;
+            }
+            else
+            {
+                selectedList = lvList.SelectedItems;
+            }
+            if (selectedList != null && selectedList.Count > 0)
             {
                 List<FolderItem> downLoadList = new List<FolderItem>();
-                foreach (ListViewItem item in lvList.CheckedItems)
+                foreach (ListViewItem item in selectedList)
                 {
                     FolderItem fItem = item.Tag as FolderItem;
                     if (fItem != null)
@@ -832,6 +834,53 @@ namespace Filemanager_for_UPYUN
             return text;
         }
 
+        /// <summary>
+        /// 切换列表显示模式
+        /// </summary>
+        private void SwichListView()
+        {
+            bool hasSelectedItems = false;
+            if (this.lvList.View == View.Details)
+            {
+                this.lvList.View = View.LargeIcon;
+                this.lvList.MultiSelect = true;
+                if (this.lvList.CheckedItems != null && this.lvList.CheckedItems.Count > 0)
+                {
+                    hasSelectedItems = true;
+                    //勾选-->选中
+                    foreach (ListViewItem item in this.lvList.CheckedItems)
+                    {
+                        item.Selected = true;
+                        item.Checked = false;
+                    }
+                }
+                this.lvList.CheckBoxes = false;
+                this.chkAll.Visible = false;
+                tsbSwichIcon.Image = Filemanager_for_UPYUN.Properties.Resources.Thumbnails;
+                tsbSwichIcon.Text = "切换到列表模式";
+            }
+            else
+            {
+                this.lvList.View = View.Details;
+                this.lvList.CheckBoxes = true;
+                //选中-->勾选
+                if (this.lvList.SelectedItems != null && this.lvList.SelectedItems.Count > 0)
+                {
+                    hasSelectedItems = true;
+                    foreach (ListViewItem item in this.lvList.SelectedItems)
+                    {
+                        item.Checked = true;
+                        item.Selected = false;
+                    }
+                }
+                this.chkAll.Visible = true;
+                this.lvList.MultiSelect = false;
+                tsbSwichIcon.Image = Filemanager_for_UPYUN.Properties.Resources.List;
+                tsbSwichIcon.Text = "切换到缩略图模式";
+            }
+            SetButtonEnabled(hasSelectedItems);
+        }
+
         #endregion
 
         #region Form Events
@@ -875,7 +924,7 @@ namespace Filemanager_for_UPYUN
         //删除
         private void MenuItem_Delete_Click(object sender, EventArgs e)
         {
-            DeleteSelectedItem();
+            DeleteSelectedItems();
         }
 
         //打开文件夹
@@ -887,7 +936,7 @@ namespace Filemanager_for_UPYUN
         //下载
         private void MenuItem_Download_Click(object sender, EventArgs e)
         {
-            DownloadSelectedItem();
+            DownloadSelectedItems();
         }
 
         //打开所在目录
@@ -911,13 +960,13 @@ namespace Filemanager_for_UPYUN
         //删除按钮
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            DeleteCheckedItems();
+            DeleteSelectedItems();
         }
 
         //下载按钮
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            DownloadCheckedItems();
+            DownloadSelectedItems();
         }
 
         //上传按钮
@@ -999,6 +1048,12 @@ namespace Filemanager_for_UPYUN
 
         }
 
+        //切换列表视图模式
+        private void tsbSwichIcon_Click(object sender, EventArgs e)
+        {
+            SwichListView();
+        }
+
         #endregion
 
         #region ListView Events
@@ -1035,6 +1090,16 @@ namespace Filemanager_for_UPYUN
             {
                 SetContextMenu(MenuType.Default);
             }
+            bool hasSelectedItems = false;
+            if (lvList.View == View.Details)
+            {
+                hasSelectedItems = (lvList.CheckedItems.Count > 0);
+            }
+            else
+            {
+                hasSelectedItems = (lvList.SelectedItems.Count > 0);
+            }
+            SetButtonEnabled(hasSelectedItems);
         }
 
         //列头排序
@@ -1095,8 +1160,17 @@ namespace Filemanager_for_UPYUN
                 chkAll.Checked = true;
             }
             bool hasCheckedItem = (lvList.CheckedItems.Count > 0);
-            tsbDownload.Enabled = hasCheckedItem;
-            tsbDelete.Enabled = hasCheckedItem;
+            SetButtonEnabled(hasCheckedItem);
+        }
+
+        /// <summary>
+        /// 设置下载和删除按钮是否可用
+        /// </summary>
+        /// <param name="isEnabled"></param>
+        private void SetButtonEnabled(bool isEnabled)
+        {
+            tsbDownload.Enabled = isEnabled;
+            tsbDelete.Enabled = isEnabled;
         }
 
         //取消双击时勾选的默认效果
@@ -1288,6 +1362,7 @@ namespace Filemanager_for_UPYUN
                             BindToListView(result.DataList);
                             break;
                         case WorkType.Upload:
+                            RefreshBucketUsage();
                             RefreshList(this.curPath);
                             break;
                         case WorkType.Download:
@@ -1305,6 +1380,7 @@ namespace Filemanager_for_UPYUN
                             }
                             break;
                         case WorkType.Delete:
+                            RefreshBucketUsage();
                             RefreshList(this.curPath);
                             break;
                         case WorkType.Search:
@@ -1322,6 +1398,7 @@ namespace Filemanager_for_UPYUN
         }
 
         #endregion
+
 
     }
 }

@@ -35,38 +35,22 @@
             this.colSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colModiDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.defaultContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.defaultMenuItem_Upload = new System.Windows.Forms.ToolStripMenuItem();
-            this.defaultMenuItem_NewDir = new System.Windows.Forms.ToolStripMenuItem();
-            this.defaultMenuItem_Refresh = new System.Windows.Forms.ToolStripMenuItem();
-            this.imgList = new System.Windows.Forms.ImageList(this.components);
+            this.imageLargeList = new System.Windows.Forms.ImageList(this.components);
+            this.imgSmallList = new System.Windows.Forms.ImageList(this.components);
             this.chkAll = new System.Windows.Forms.CheckBox();
             this.tsOperationBar = new System.Windows.Forms.ToolStrip();
-            this.tsbUpload = new System.Windows.Forms.ToolStripButton();
-            this.tsbDownload = new System.Windows.Forms.ToolStripButton();
-            this.tsbNewDir = new System.Windows.Forms.ToolStripButton();
-            this.tsbDelete = new System.Windows.Forms.ToolStripButton();
             this.itemContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.itemMenuItem_OpenDir = new System.Windows.Forms.ToolStripMenuItem();
-            this.itemMenuItem_Download = new System.Windows.Forms.ToolStripMenuItem();
-            this.itemMenuItem_Delete = new System.Windows.Forms.ToolStripMenuItem();
-            this.itemMenuItem_OpenParentDir = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
             this.panel6 = new System.Windows.Forms.Panel();
             this.panel10 = new System.Windows.Forms.Panel();
             this.panel11 = new System.Windows.Forms.Panel();
             this.tsUrlBar = new System.Windows.Forms.ToolStrip();
-            this.tsbHome = new System.Windows.Forms.ToolStripButton();
-            this.tslDefaultArrow = new System.Windows.Forms.ToolStripLabel();
             this.panel9 = new System.Windows.Forms.Panel();
             this.tsSearchBar = new System.Windows.Forms.ToolStrip();
-            this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsbSearchText = new System.Windows.Forms.ToolStripTextBox();
-            this.tsbSearchButton = new System.Windows.Forms.ToolStripButton();
             this.panel5 = new System.Windows.Forms.Panel();
             this.tsHistoryBar = new System.Windows.Forms.ToolStrip();
-            this.tsbBack = new System.Windows.Forms.ToolStripButton();
-            this.tsbForward = new System.Windows.Forms.ToolStripButton();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
             this.panel7 = new System.Windows.Forms.Panel();
@@ -82,6 +66,24 @@
             this.tsStatusMsg = new System.Windows.Forms.ToolStripStatusLabel();
             this.pnlStatus = new System.Windows.Forms.Panel();
             this.panel13 = new System.Windows.Forms.Panel();
+            this.defaultMenuItem_Upload = new System.Windows.Forms.ToolStripMenuItem();
+            this.defaultMenuItem_NewDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.defaultMenuItem_Refresh = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsbHome = new System.Windows.Forms.ToolStripButton();
+            this.tslDefaultArrow = new System.Windows.Forms.ToolStripLabel();
+            this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsbSearchButton = new System.Windows.Forms.ToolStripButton();
+            this.tsbSwichIcon = new System.Windows.Forms.ToolStripButton();
+            this.tsbBack = new System.Windows.Forms.ToolStripButton();
+            this.tsbForward = new System.Windows.Forms.ToolStripButton();
+            this.tsbUpload = new System.Windows.Forms.ToolStripButton();
+            this.tsbDownload = new System.Windows.Forms.ToolStripButton();
+            this.tsbNewDir = new System.Windows.Forms.ToolStripButton();
+            this.tsbDelete = new System.Windows.Forms.ToolStripButton();
+            this.itemMenuItem_OpenDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.itemMenuItem_Download = new System.Windows.Forms.ToolStripMenuItem();
+            this.itemMenuItem_Delete = new System.Windows.Forms.ToolStripMenuItem();
+            this.itemMenuItem_OpenParentDir = new System.Windows.Forms.ToolStripMenuItem();
             this.defaultContextMenu.SuspendLayout();
             this.tsOperationBar.SuspendLayout();
             this.itemContextMenu.SuspendLayout();
@@ -117,11 +119,12 @@
             this.lvList.ContextMenuStrip = this.defaultContextMenu;
             this.lvList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvList.FullRowSelect = true;
+            this.lvList.LargeImageList = this.imageLargeList;
             this.lvList.Location = new System.Drawing.Point(0, 0);
             this.lvList.MultiSelect = false;
             this.lvList.Name = "lvList";
             this.lvList.Size = new System.Drawing.Size(584, 330);
-            this.lvList.SmallImageList = this.imgList;
+            this.lvList.SmallImageList = this.imgSmallList;
             this.lvList.TabIndex = 0;
             this.lvList.UseCompatibleStateImageBehavior = false;
             this.lvList.View = System.Windows.Forms.View.Details;
@@ -158,35 +161,17 @@
             this.defaultContextMenu.Name = "contextMenu";
             this.defaultContextMenu.Size = new System.Drawing.Size(137, 70);
             // 
-            // defaultMenuItem_Upload
+            // imageLargeList
             // 
-            this.defaultMenuItem_Upload.Image = global::Filemanager_for_UPYUN.Properties.Resources.Upload;
-            this.defaultMenuItem_Upload.Name = "defaultMenuItem_Upload";
-            this.defaultMenuItem_Upload.Size = new System.Drawing.Size(136, 22);
-            this.defaultMenuItem_Upload.Text = "上传";
-            this.defaultMenuItem_Upload.Click += new System.EventHandler(this.MenuItem_Upload_Click);
+            this.imageLargeList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imageLargeList.ImageSize = new System.Drawing.Size(64, 64);
+            this.imageLargeList.TransparentColor = System.Drawing.Color.Transparent;
             // 
-            // defaultMenuItem_NewDir
+            // imgSmallList
             // 
-            this.defaultMenuItem_NewDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.NewFolder;
-            this.defaultMenuItem_NewDir.Name = "defaultMenuItem_NewDir";
-            this.defaultMenuItem_NewDir.Size = new System.Drawing.Size(136, 22);
-            this.defaultMenuItem_NewDir.Text = "新建文件夹";
-            this.defaultMenuItem_NewDir.Click += new System.EventHandler(this.MenuItem_NewDir_Click);
-            // 
-            // defaultMenuItem_Refresh
-            // 
-            this.defaultMenuItem_Refresh.Image = global::Filemanager_for_UPYUN.Properties.Resources.Refresh;
-            this.defaultMenuItem_Refresh.Name = "defaultMenuItem_Refresh";
-            this.defaultMenuItem_Refresh.Size = new System.Drawing.Size(136, 22);
-            this.defaultMenuItem_Refresh.Text = "刷新";
-            this.defaultMenuItem_Refresh.Click += new System.EventHandler(this.Refresh_Click);
-            // 
-            // imgList
-            // 
-            this.imgList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imgList.ImageSize = new System.Drawing.Size(21, 21);
-            this.imgList.TransparentColor = System.Drawing.Color.Transparent;
+            this.imgSmallList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imgSmallList.ImageSize = new System.Drawing.Size(21, 21);
+            this.imgSmallList.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // chkAll
             // 
@@ -214,44 +199,6 @@
             this.tsOperationBar.Size = new System.Drawing.Size(370, 30);
             this.tsOperationBar.TabIndex = 1;
             // 
-            // tsbUpload
-            // 
-            this.tsbUpload.Image = global::Filemanager_for_UPYUN.Properties.Resources.Upload;
-            this.tsbUpload.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbUpload.Name = "tsbUpload";
-            this.tsbUpload.Size = new System.Drawing.Size(52, 27);
-            this.tsbUpload.Text = "上传";
-            this.tsbUpload.Click += new System.EventHandler(this.btnUpload_Click);
-            // 
-            // tsbDownload
-            // 
-            this.tsbDownload.Enabled = false;
-            this.tsbDownload.Image = global::Filemanager_for_UPYUN.Properties.Resources.Download;
-            this.tsbDownload.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbDownload.Name = "tsbDownload";
-            this.tsbDownload.Size = new System.Drawing.Size(52, 27);
-            this.tsbDownload.Text = "下载";
-            this.tsbDownload.Click += new System.EventHandler(this.btnDownload_Click);
-            // 
-            // tsbNewDir
-            // 
-            this.tsbNewDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.NewFolder;
-            this.tsbNewDir.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbNewDir.Name = "tsbNewDir";
-            this.tsbNewDir.Size = new System.Drawing.Size(88, 27);
-            this.tsbNewDir.Text = "新建文件夹";
-            this.tsbNewDir.Click += new System.EventHandler(this.btnNewDir_Click);
-            // 
-            // tsbDelete
-            // 
-            this.tsbDelete.Enabled = false;
-            this.tsbDelete.Image = global::Filemanager_for_UPYUN.Properties.Resources.Delete;
-            this.tsbDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbDelete.Name = "tsbDelete";
-            this.tsbDelete.Size = new System.Drawing.Size(52, 27);
-            this.tsbDelete.Text = "删除";
-            this.tsbDelete.Click += new System.EventHandler(this.btnDelete_Click);
-            // 
             // itemContextMenu
             // 
             this.itemContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -261,39 +208,6 @@
             this.itemMenuItem_OpenParentDir});
             this.itemContextMenu.Name = "dirContextMenu";
             this.itemContextMenu.Size = new System.Drawing.Size(149, 92);
-            // 
-            // itemMenuItem_OpenDir
-            // 
-            this.itemMenuItem_OpenDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.OpenFolder;
-            this.itemMenuItem_OpenDir.Name = "itemMenuItem_OpenDir";
-            this.itemMenuItem_OpenDir.Size = new System.Drawing.Size(148, 22);
-            this.itemMenuItem_OpenDir.Text = "打开";
-            this.itemMenuItem_OpenDir.Click += new System.EventHandler(this.MenuItem_OpenDir_Click);
-            // 
-            // itemMenuItem_Download
-            // 
-            this.itemMenuItem_Download.Image = global::Filemanager_for_UPYUN.Properties.Resources.Download;
-            this.itemMenuItem_Download.Name = "itemMenuItem_Download";
-            this.itemMenuItem_Download.Size = new System.Drawing.Size(148, 22);
-            this.itemMenuItem_Download.Text = "下载";
-            this.itemMenuItem_Download.Click += new System.EventHandler(this.MenuItem_Download_Click);
-            // 
-            // itemMenuItem_Delete
-            // 
-            this.itemMenuItem_Delete.Image = global::Filemanager_for_UPYUN.Properties.Resources.Delete;
-            this.itemMenuItem_Delete.Name = "itemMenuItem_Delete";
-            this.itemMenuItem_Delete.Size = new System.Drawing.Size(148, 22);
-            this.itemMenuItem_Delete.Text = "删除";
-            this.itemMenuItem_Delete.Click += new System.EventHandler(this.MenuItem_Delete_Click);
-            // 
-            // itemMenuItem_OpenParentDir
-            // 
-            this.itemMenuItem_OpenParentDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.Folder;
-            this.itemMenuItem_OpenParentDir.Name = "itemMenuItem_OpenParentDir";
-            this.itemMenuItem_OpenParentDir.Size = new System.Drawing.Size(148, 22);
-            this.itemMenuItem_OpenParentDir.Text = "打开所在目录";
-            this.itemMenuItem_OpenParentDir.Visible = false;
-            this.itemMenuItem_OpenParentDir.Click += new System.EventHandler(this.MenuItem_OpenParentDir_Click);
             // 
             // panel1
             // 
@@ -340,7 +254,7 @@
             this.panel11.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel11.Location = new System.Drawing.Point(0, 0);
             this.panel11.Name = "panel11";
-            this.panel11.Size = new System.Drawing.Size(303, 30);
+            this.panel11.Size = new System.Drawing.Size(277, 30);
             this.panel11.TabIndex = 1;
             // 
             // tsUrlBar
@@ -353,32 +267,17 @@
             this.tsUrlBar.Location = new System.Drawing.Point(0, 0);
             this.tsUrlBar.Name = "tsUrlBar";
             this.tsUrlBar.Padding = new System.Windows.Forms.Padding(10, 0, 1, 0);
-            this.tsUrlBar.Size = new System.Drawing.Size(303, 30);
+            this.tsUrlBar.Size = new System.Drawing.Size(277, 30);
             this.tsUrlBar.TabIndex = 4;
             this.tsUrlBar.Text = "tsUrlBar";
-            // 
-            // tsbHome
-            // 
-            this.tsbHome.Image = global::Filemanager_for_UPYUN.Properties.Resources.Home;
-            this.tsbHome.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbHome.Name = "tsbHome";
-            this.tsbHome.Size = new System.Drawing.Size(52, 27);
-            this.tsbHome.Text = "主页";
-            this.tsbHome.Click += new System.EventHandler(this.btnHome_Click);
-            // 
-            // tslDefaultArrow
-            // 
-            this.tslDefaultArrow.Image = global::Filemanager_for_UPYUN.Properties.Resources.Arrow;
-            this.tslDefaultArrow.Name = "tslDefaultArrow";
-            this.tslDefaultArrow.Size = new System.Drawing.Size(16, 27);
             // 
             // panel9
             // 
             this.panel9.Controls.Add(this.tsSearchBar);
             this.panel9.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel9.Location = new System.Drawing.Point(303, 0);
+            this.panel9.Location = new System.Drawing.Point(277, 0);
             this.panel9.Name = "panel9";
-            this.panel9.Size = new System.Drawing.Size(214, 30);
+            this.panel9.Size = new System.Drawing.Size(240, 30);
             this.panel9.TabIndex = 0;
             // 
             // tsSearchBar
@@ -388,21 +287,12 @@
             this.tsSearchBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbRefresh,
             this.tsbSearchText,
-            this.tsbSearchButton});
+            this.tsbSearchButton,
+            this.tsbSwichIcon});
             this.tsSearchBar.Location = new System.Drawing.Point(0, 0);
             this.tsSearchBar.Name = "tsSearchBar";
-            this.tsSearchBar.Size = new System.Drawing.Size(214, 30);
+            this.tsSearchBar.Size = new System.Drawing.Size(240, 30);
             this.tsSearchBar.TabIndex = 0;
-            // 
-            // tsbRefresh
-            // 
-            this.tsbRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbRefresh.Image = global::Filemanager_for_UPYUN.Properties.Resources.Refresh;
-            this.tsbRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbRefresh.Name = "tsbRefresh";
-            this.tsbRefresh.Size = new System.Drawing.Size(23, 27);
-            this.tsbRefresh.Text = "刷新";
-            this.tsbRefresh.Click += new System.EventHandler(this.Refresh_Click);
             // 
             // tsbSearchText
             // 
@@ -413,16 +303,6 @@
             this.tsbSearchText.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tsbSearchText_KeyDown);
             this.tsbSearchText.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Text_KeyPress);
             this.tsbSearchText.TextChanged += new System.EventHandler(this.Text_TextChanged);
-            // 
-            // tsbSearchButton
-            // 
-            this.tsbSearchButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbSearchButton.Image = global::Filemanager_for_UPYUN.Properties.Resources.Search;
-            this.tsbSearchButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbSearchButton.Name = "tsbSearchButton";
-            this.tsbSearchButton.Size = new System.Drawing.Size(23, 27);
-            this.tsbSearchButton.Text = "搜索";
-            this.tsbSearchButton.Click += new System.EventHandler(this.tsbSearchButton_Click);
             // 
             // panel5
             // 
@@ -445,28 +325,6 @@
             this.tsHistoryBar.Padding = new System.Windows.Forms.Padding(10, 0, 1, 0);
             this.tsHistoryBar.Size = new System.Drawing.Size(67, 30);
             this.tsHistoryBar.TabIndex = 0;
-            // 
-            // tsbBack
-            // 
-            this.tsbBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbBack.Enabled = false;
-            this.tsbBack.Image = global::Filemanager_for_UPYUN.Properties.Resources.Back;
-            this.tsbBack.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbBack.Name = "tsbBack";
-            this.tsbBack.Size = new System.Drawing.Size(23, 27);
-            this.tsbBack.Text = "后退";
-            this.tsbBack.Click += new System.EventHandler(this.tsbBack_Click);
-            // 
-            // tsbForward
-            // 
-            this.tsbForward.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbForward.Enabled = false;
-            this.tsbForward.Image = global::Filemanager_for_UPYUN.Properties.Resources.Forward;
-            this.tsbForward.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbForward.Name = "tsbForward";
-            this.tsbForward.Size = new System.Drawing.Size(23, 27);
-            this.tsbForward.Text = "前进";
-            this.tsbForward.Click += new System.EventHandler(this.tsbForward_Click);
             // 
             // panel3
             // 
@@ -604,6 +462,168 @@
             this.panel13.Size = new System.Drawing.Size(584, 352);
             this.panel13.TabIndex = 6;
             // 
+            // defaultMenuItem_Upload
+            // 
+            this.defaultMenuItem_Upload.Image = global::Filemanager_for_UPYUN.Properties.Resources.Upload;
+            this.defaultMenuItem_Upload.Name = "defaultMenuItem_Upload";
+            this.defaultMenuItem_Upload.Size = new System.Drawing.Size(136, 22);
+            this.defaultMenuItem_Upload.Text = "上传";
+            this.defaultMenuItem_Upload.Click += new System.EventHandler(this.MenuItem_Upload_Click);
+            // 
+            // defaultMenuItem_NewDir
+            // 
+            this.defaultMenuItem_NewDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.NewFolder;
+            this.defaultMenuItem_NewDir.Name = "defaultMenuItem_NewDir";
+            this.defaultMenuItem_NewDir.Size = new System.Drawing.Size(136, 22);
+            this.defaultMenuItem_NewDir.Text = "新建文件夹";
+            this.defaultMenuItem_NewDir.Click += new System.EventHandler(this.MenuItem_NewDir_Click);
+            // 
+            // defaultMenuItem_Refresh
+            // 
+            this.defaultMenuItem_Refresh.Image = global::Filemanager_for_UPYUN.Properties.Resources.Refresh;
+            this.defaultMenuItem_Refresh.Name = "defaultMenuItem_Refresh";
+            this.defaultMenuItem_Refresh.Size = new System.Drawing.Size(136, 22);
+            this.defaultMenuItem_Refresh.Text = "刷新";
+            this.defaultMenuItem_Refresh.Click += new System.EventHandler(this.Refresh_Click);
+            // 
+            // tsbHome
+            // 
+            this.tsbHome.Image = global::Filemanager_for_UPYUN.Properties.Resources.Home;
+            this.tsbHome.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbHome.Name = "tsbHome";
+            this.tsbHome.Size = new System.Drawing.Size(52, 27);
+            this.tsbHome.Text = "主页";
+            this.tsbHome.Click += new System.EventHandler(this.btnHome_Click);
+            // 
+            // tslDefaultArrow
+            // 
+            this.tslDefaultArrow.Image = global::Filemanager_for_UPYUN.Properties.Resources.Arrow;
+            this.tslDefaultArrow.Name = "tslDefaultArrow";
+            this.tslDefaultArrow.Size = new System.Drawing.Size(16, 27);
+            // 
+            // tsbRefresh
+            // 
+            this.tsbRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbRefresh.Image = global::Filemanager_for_UPYUN.Properties.Resources.Refresh;
+            this.tsbRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbRefresh.Name = "tsbRefresh";
+            this.tsbRefresh.Size = new System.Drawing.Size(23, 27);
+            this.tsbRefresh.Text = "刷新";
+            this.tsbRefresh.Click += new System.EventHandler(this.Refresh_Click);
+            // 
+            // tsbSearchButton
+            // 
+            this.tsbSearchButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbSearchButton.Image = global::Filemanager_for_UPYUN.Properties.Resources.Search;
+            this.tsbSearchButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbSearchButton.Name = "tsbSearchButton";
+            this.tsbSearchButton.Size = new System.Drawing.Size(23, 27);
+            this.tsbSearchButton.Text = "搜索";
+            this.tsbSearchButton.Click += new System.EventHandler(this.tsbSearchButton_Click);
+            // 
+            // tsbSwichIcon
+            // 
+            this.tsbSwichIcon.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbSwichIcon.Image = global::Filemanager_for_UPYUN.Properties.Resources.List;
+            this.tsbSwichIcon.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbSwichIcon.Name = "tsbSwichIcon";
+            this.tsbSwichIcon.Size = new System.Drawing.Size(23, 27);
+            this.tsbSwichIcon.Text = "切换到缩略图模式";
+            this.tsbSwichIcon.Click += new System.EventHandler(this.tsbSwichIcon_Click);
+            // 
+            // tsbBack
+            // 
+            this.tsbBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbBack.Enabled = false;
+            this.tsbBack.Image = global::Filemanager_for_UPYUN.Properties.Resources.Back;
+            this.tsbBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbBack.Name = "tsbBack";
+            this.tsbBack.Size = new System.Drawing.Size(23, 27);
+            this.tsbBack.Text = "后退";
+            this.tsbBack.Click += new System.EventHandler(this.tsbBack_Click);
+            // 
+            // tsbForward
+            // 
+            this.tsbForward.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbForward.Enabled = false;
+            this.tsbForward.Image = global::Filemanager_for_UPYUN.Properties.Resources.Forward;
+            this.tsbForward.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbForward.Name = "tsbForward";
+            this.tsbForward.Size = new System.Drawing.Size(23, 27);
+            this.tsbForward.Text = "前进";
+            this.tsbForward.Click += new System.EventHandler(this.tsbForward_Click);
+            // 
+            // tsbUpload
+            // 
+            this.tsbUpload.Image = global::Filemanager_for_UPYUN.Properties.Resources.Upload;
+            this.tsbUpload.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbUpload.Name = "tsbUpload";
+            this.tsbUpload.Size = new System.Drawing.Size(52, 27);
+            this.tsbUpload.Text = "上传";
+            this.tsbUpload.Click += new System.EventHandler(this.btnUpload_Click);
+            // 
+            // tsbDownload
+            // 
+            this.tsbDownload.Enabled = false;
+            this.tsbDownload.Image = global::Filemanager_for_UPYUN.Properties.Resources.Download;
+            this.tsbDownload.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbDownload.Name = "tsbDownload";
+            this.tsbDownload.Size = new System.Drawing.Size(52, 27);
+            this.tsbDownload.Text = "下载";
+            this.tsbDownload.Click += new System.EventHandler(this.btnDownload_Click);
+            // 
+            // tsbNewDir
+            // 
+            this.tsbNewDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.NewFolder;
+            this.tsbNewDir.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbNewDir.Name = "tsbNewDir";
+            this.tsbNewDir.Size = new System.Drawing.Size(88, 27);
+            this.tsbNewDir.Text = "新建文件夹";
+            this.tsbNewDir.Click += new System.EventHandler(this.btnNewDir_Click);
+            // 
+            // tsbDelete
+            // 
+            this.tsbDelete.Enabled = false;
+            this.tsbDelete.Image = global::Filemanager_for_UPYUN.Properties.Resources.Delete;
+            this.tsbDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbDelete.Name = "tsbDelete";
+            this.tsbDelete.Size = new System.Drawing.Size(52, 27);
+            this.tsbDelete.Text = "删除";
+            this.tsbDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            // 
+            // itemMenuItem_OpenDir
+            // 
+            this.itemMenuItem_OpenDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.OpenFolder;
+            this.itemMenuItem_OpenDir.Name = "itemMenuItem_OpenDir";
+            this.itemMenuItem_OpenDir.Size = new System.Drawing.Size(148, 22);
+            this.itemMenuItem_OpenDir.Text = "打开";
+            this.itemMenuItem_OpenDir.Click += new System.EventHandler(this.MenuItem_OpenDir_Click);
+            // 
+            // itemMenuItem_Download
+            // 
+            this.itemMenuItem_Download.Image = global::Filemanager_for_UPYUN.Properties.Resources.Download;
+            this.itemMenuItem_Download.Name = "itemMenuItem_Download";
+            this.itemMenuItem_Download.Size = new System.Drawing.Size(148, 22);
+            this.itemMenuItem_Download.Text = "下载";
+            this.itemMenuItem_Download.Click += new System.EventHandler(this.MenuItem_Download_Click);
+            // 
+            // itemMenuItem_Delete
+            // 
+            this.itemMenuItem_Delete.Image = global::Filemanager_for_UPYUN.Properties.Resources.Delete;
+            this.itemMenuItem_Delete.Name = "itemMenuItem_Delete";
+            this.itemMenuItem_Delete.Size = new System.Drawing.Size(148, 22);
+            this.itemMenuItem_Delete.Text = "删除";
+            this.itemMenuItem_Delete.Click += new System.EventHandler(this.MenuItem_Delete_Click);
+            // 
+            // itemMenuItem_OpenParentDir
+            // 
+            this.itemMenuItem_OpenParentDir.Image = global::Filemanager_for_UPYUN.Properties.Resources.Folder;
+            this.itemMenuItem_OpenParentDir.Name = "itemMenuItem_OpenParentDir";
+            this.itemMenuItem_OpenParentDir.Size = new System.Drawing.Size(148, 22);
+            this.itemMenuItem_OpenParentDir.Text = "打开所在目录";
+            this.itemMenuItem_OpenParentDir.Visible = false;
+            this.itemMenuItem_OpenParentDir.Click += new System.EventHandler(this.MenuItem_OpenParentDir_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -667,7 +687,7 @@
         private System.Windows.Forms.ToolStripMenuItem defaultMenuItem_NewDir;
         private System.Windows.Forms.ToolStripMenuItem defaultMenuItem_Refresh;
         private System.Windows.Forms.ContextMenuStrip itemContextMenu;
-        private System.Windows.Forms.ImageList imgList;
+        private System.Windows.Forms.ImageList imgSmallList;
         private System.Windows.Forms.CheckBox chkAll;
         private System.Windows.Forms.ToolStripMenuItem itemMenuItem_Delete;
         private System.Windows.Forms.ToolStripMenuItem itemMenuItem_OpenDir;
@@ -710,5 +730,7 @@
         private System.Windows.Forms.ToolStripProgressBar tsStatusProgressBar;
         private System.Windows.Forms.Panel pnlStatus;
         private System.Windows.Forms.Panel panel13;
+        private System.Windows.Forms.ImageList imageLargeList;
+        private System.Windows.Forms.ToolStripButton tsbSwichIcon;
     }
 }
