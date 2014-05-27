@@ -635,7 +635,7 @@
             this.MinimumSize = new System.Drawing.Size(500, 200);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "UP云管家";
+            this.Text = "UP简易文件管理工具";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.defaultContextMenu.ResumeLayout(false);
             this.tsOperationBar.ResumeLayout(false);

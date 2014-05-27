@@ -20,7 +20,7 @@ namespace Filemanager_for_UPYUN
         readonly string dirSeparator = Path.DirectorySeparatorChar.ToString();//目录分隔符
         UpYun upYun;
         string curPath = "";//当前路径
-        string downPath = "D:\\upyun";//下载路径
+        string downPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads\\UPYUN";//下载路径
         DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);//用于计算最后修改时间
         Stack<string> urlForwardStack = new Stack<string>();//前进栈
         Stack<string> urlBackStack = new Stack<string>();//后退栈
@@ -891,6 +891,10 @@ namespace Filemanager_for_UPYUN
             RefreshList(this.curPath, false);
             lvList.ListViewItemSorter = new ListViewColumnSorter();
             this.lblLoading.Image = Filemanager_for_UPYUN.Properties.Resources.loading;
+            if (!Directory.Exists(downPath))
+            {
+                Directory.CreateDirectory(downPath);
+            }
         }
 
         private void panLoading_Resize(object sender, EventArgs e)
